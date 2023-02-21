@@ -407,7 +407,7 @@ Vtiger.Class("Control_Layout_Fields_Js",{
         });
         return list_fields;
     },
-    displayByClfOnDetail:function(moduleName,requestMode,record_id,blockid,new_value){
+    displayByClfOnDetail:function(moduleName,requestMode, fieldChangedName,record_id,blockid,new_value){
         var thisInstance = this;
         //to integrate with Custom View & Form
         if(moduleName == "CustomFormsViews"){
@@ -572,7 +572,7 @@ Vtiger.Class("Control_Layout_Fields_Js",{
                                 }
                             }
                             else{
-                                var check_condition = thisInstance.checkConditionToForm(all_condition, any_condition, 'clf_details',record_info,role_id,'');
+                                var check_condition = thisInstance.checkConditionToForm(all_condition, any_condition, fieldChangedName,record_info,role_id,'');
                                 if (check_condition) {
                                     jQuery.each(actions, function (index, value) {
                                         if (typeof requestMode != 'undefined' && requestMode == 'full') {
@@ -1486,6 +1486,7 @@ Vtiger.Class("Control_Layout_Fields_Js",{
     }
     //1205661 END
 });
+var fieldChangedName = '';
 jQuery(document).ready(function(){
     // Only load when loadHeaderScript=1 BEGIN #241208
     var vtetabdonotworking = false;
@@ -1503,7 +1504,9 @@ jQuery(document).ready(function(){
         }
     }
     // Only load when loadHeaderScript=1 END #241208
-
+    jQuery("#detailView,.relatedblockslists_records").on("change", "input,select,textarea", function () {
+        fieldChangedName = jQuery(this).attr('name');
+    });
     var clfInstance = new Control_Layout_Fields_Js();
     clfInstance.registerEvents();
     var view = app.view();
@@ -1529,7 +1532,7 @@ jQuery(document).ready(function(){
         if(typeof array_url == 'undefined') return false;
         var request_mode = array_url.requestMode;
         var record_id = jQuery('#recordId').val();
-        clfInstance.displayByClfOnDetail(module,request_mode,record_id);
+        clfInstance.displayByClfOnDetail(module,request_mode,fieldChangedName,record_id);
         clfInstance.registerInlineAjaxSaveClickEvent();
     }
 });
@@ -1586,7 +1589,7 @@ jQuery( document ).ajaxComplete(function(event, xhr, settings) {
             if(relatedblockslists_records.length > 0){
                 var block_id = relatedblockslists_records.closest('.relatedblockslists_records').data('block-id');
                 var module_reference = other_url.module;
-                instance.displayByClfOnDetail(module_reference,request_mode,record_id,block_id,new_value);
+                instance.displayByClfOnDetail(module_reference,request_mode, fieldChangedName,record_id,block_id,new_value);
             }else{
                 $('.tab-item.active').trigger('click');
             }
@@ -1595,7 +1598,7 @@ jQuery( document ).ajaxComplete(function(event, xhr, settings) {
     }
     else if(array_url.view == 'Detail'&& other_url.mode == 'showDetailViewByMode'){
         var record_id = jQuery('#recordId').val();
-        instance.displayByClfOnDetail(array_url.module,request_mode,record_id);
+        instance.displayByClfOnDetail(array_url.module,request_mode, fieldChangedName,record_id);
         instance.registerInlineAjaxSaveClickEvent();
     }
     else{
@@ -1606,7 +1609,7 @@ jQuery( document ).ajaxComplete(function(event, xhr, settings) {
         }
         if(other_url.module == 'VTETabs' && other_url.view == 'DetailViewAjax' && other_url.mode == 'showModuleDetailView') {
             var record_id = jQuery('#recordId').val();
-            instance.displayByClfOnDetail(array_url.module,request_mode,record_id);
+            instance.displayByClfOnDetail(array_url.module,request_mode, fieldChangedName,record_id);
             instance.registerInlineAjaxSaveClickEvent();
         }
         //START
@@ -1627,7 +1630,7 @@ jQuery( document ).ajaxComplete(function(event, xhr, settings) {
             var relatedblockslists_records = $(document).find('div.relatedblockslists' + blockid);
             if(relatedblockslists_records.length > 0){
                 var module = relatedblockslists_records.data('rel-module');
-                instance.displayByClfOnDetail(module,request_mode,record_id,blockid,"");
+                instance.displayByClfOnDetail(module,request_mode, fieldChangedName,record_id,blockid,"");
                 instance.registerInlineAjaxSaveClickEvent();
                 instance.registerFormChange(module);
             }
