@@ -575,7 +575,7 @@ Vtiger.Class("Control_Layout_Fields_Js",{
                                 var check_condition = thisInstance.checkConditionToForm(all_condition, any_condition, fieldChangedName,record_info,role_id,'');
                                 if (check_condition) {
                                     jQuery.each(actions, function (index, value) {
-                                        if (typeof requestMode != 'undefined' && requestMode == 'full') {
+                                        if (requestMode !== undefined && requestMode == 'full') {
                                             var target_td = jQuery("#" + moduleName + "_detailView_fieldValue_" + value.field);
                                             var target_value = target_td.children('span:first').html();
                                             if (target_td.children('span:first').data('field-type') == 'url') {
@@ -858,15 +858,11 @@ Vtiger.Class("Control_Layout_Fields_Js",{
         if(all_condition.length == 0 && any_condition.length == 0){
             return true;
         }
-        //TASKID:13034 - DEV: tiennguyen - DATE: 2018-10-16 - START
-        //NOTE correct logic for condition
         if(all_condition.length == 0 && any_condition.length > 0 ) is_all = true;
         if(all_condition.length > 0 && any_condition.length == 0 ) is_any = true;
-        //TASKID:13034 - DEV: tiennguyen - DATE: 2018-10-16 - END
 	    var fields_on_conditions = thisInstance.getFieldOnConditions(all_condition,any_condition);
         jQuery.each(all_condition,function(key,value){
             var field_name = value.columnname;
-            //console.log("field_name:"+field_name);
             var field_value =  value.value;
             var comparator =  value.comparator;
             var main_form = jQuery('#EditView');
@@ -900,7 +896,6 @@ Vtiger.Class("Control_Layout_Fields_Js",{
 
             }
             if(typeof form_element_value == 'undefined' && field_name_changed == 'clf_details'){
-                //var record_info = thisInstance.getRecordIdAndModule();
                 if(typeof thisInstance.fieldValuesCache[field_name] == 'undefined') {
                     form_element_value = record_info[field_name];
                     thisInstance.fieldValuesCache[field_name] = form_element_value;
@@ -911,8 +906,6 @@ Vtiger.Class("Control_Layout_Fields_Js",{
             if( field_name_changed == 'parent_id') {
                 if (new_value != '' && typeof form_element_value == 'undefined') form_element_value = new_value;
             }
-            //console.log("form_element_value:"+form_element_value);
-            //for Multiple Value control
             if(form_element.attr('type') == 'hidden'){
                 form_element = form_element.next();
                 if(!form_element.is('input')){
@@ -935,9 +928,6 @@ Vtiger.Class("Control_Layout_Fields_Js",{
             if(field_name == "roleid"){
                 form_element_value = role_id;
             }
-            //START
-            //TASKID: 1030263 - DEV: tuan@vtexperts.com - DATE: 25/09/2018
-            //NOTES: For working with RBL
             if(typeof form_element_value == "undefined"){
                 form_element = main_form.find('[name*="'+field_name+'"]');
                 if(form_element.length > 0) form_element_value = form_element.val();
@@ -951,18 +941,13 @@ Vtiger.Class("Control_Layout_Fields_Js",{
                     }
                 });
             }
-//             if($.inArray(field_name_changed,fields_on_conditions) > 0 && new_value != undefined && new_value != ''){
-//                 form_element_value = new_value;
-//             }
-            ////END
-            //#1115263
-            // fix issue all condition not correct.
-            if( typeof form_element_value != "undefined"){
+            if(form_element_value !== undefined){
                 var result = thisInstance.checkCondition(form_element_value,comparator,field_value,field_name_changed,field_name);
                 if(result == true){
                     is_all = result;
                 }else{
                     is_all = false;
+                    return false;
                 }
             }
         });
@@ -981,14 +966,10 @@ Vtiger.Class("Control_Layout_Fields_Js",{
                 form_element = jQuery('[data-name="' +field_name+ '"]');
                 form_element.val(form_element.attr('data-value'));
             }
-            if(!form_element.length){
-                //return; //687370 - need to get value from record_info
-            }
             var form_element_value = form_element.val();
             if(typeof form_element_value == 'undefined' && field_name_changed == 'clf_details'){
                 var record_info = thisInstance.getRecordIdAndModule();
                 if(typeof thisInstance.fieldValuesCache[field_name] == 'undefined') {
-                    //form_element_value = thisInstance.getFieldValue(field_name,record_info[0],record_info[1]);
                     jQuery.each(record_info,function(key,value){
                         if(key == field_name) form_element_value = value;
                     });
@@ -1019,17 +1000,11 @@ Vtiger.Class("Control_Layout_Fields_Js",{
             }
             if(typeof form_element_value == "undefined") return false;
             var result = thisInstance.checkCondition(form_element_value,comparator,field_value,field_name_changed,field_name);
-            //#1115263
-            // only need one condition true then is_any true.
             if(result){
                 is_any = true;
             }
         });
-        // return is_all || is_any;
-        //TASKID:13034 - DEV: tiennguyen - DATE: 2018-10-16 - START
-        //NOTE correct logic for condition
         return is_all && is_any;
-        //TASKID:13034 - DEV: tiennguyen - DATE: 2018-10-16 - END
 
     },
     registerFormChange:function(module){
@@ -1533,6 +1508,7 @@ jQuery(document).ready(function(){
         var request_mode = array_url.requestMode;
         var record_id = jQuery('#recordId').val();
         clfInstance.displayByClfOnDetail(module,request_mode,fieldChangedName,record_id);
+        fieldChangedName = '';
         clfInstance.registerInlineAjaxSaveClickEvent();
     }
 });
@@ -1590,6 +1566,7 @@ jQuery( document ).ajaxComplete(function(event, xhr, settings) {
                 var block_id = relatedblockslists_records.closest('.relatedblockslists_records').data('block-id');
                 var module_reference = other_url.module;
                 instance.displayByClfOnDetail(module_reference,request_mode, fieldChangedName,record_id,block_id,new_value);
+                fieldChangedName = '';
             }else{
                 $('.tab-item.active').trigger('click');
             }
@@ -1599,6 +1576,7 @@ jQuery( document ).ajaxComplete(function(event, xhr, settings) {
     else if(array_url.view == 'Detail'&& other_url.mode == 'showDetailViewByMode'){
         var record_id = jQuery('#recordId').val();
         instance.displayByClfOnDetail(array_url.module,request_mode, fieldChangedName,record_id);
+        fieldChangedName = '';
         instance.registerInlineAjaxSaveClickEvent();
     }
     else{
@@ -1610,6 +1588,7 @@ jQuery( document ).ajaxComplete(function(event, xhr, settings) {
         if(other_url.module == 'VTETabs' && other_url.view == 'DetailViewAjax' && other_url.mode == 'showModuleDetailView') {
             var record_id = jQuery('#recordId').val();
             instance.displayByClfOnDetail(array_url.module,request_mode, fieldChangedName,record_id);
+            fieldChangedName = '';
             instance.registerInlineAjaxSaveClickEvent();
         }
         //START
@@ -1631,6 +1610,7 @@ jQuery( document ).ajaxComplete(function(event, xhr, settings) {
             if(relatedblockslists_records.length > 0){
                 var module = relatedblockslists_records.data('rel-module');
                 instance.displayByClfOnDetail(module,request_mode, fieldChangedName,record_id,blockid,"");
+                fieldChangedName = '';
                 instance.registerInlineAjaxSaveClickEvent();
                 instance.registerFormChange(module);
             }
