@@ -111,7 +111,6 @@ Vtiger.Class("Control_Layout_Fields_Js",{
         app.request.post({'data': params}).then(
             function(err,data){
                 if(err === null) {
-                    var arrFieldsName = [];
                     if(!jQuery.isEmptyObject(data)){
                         var role_id = data.role_id;
                         jQuery.each(data.clf_info,function(k,v){
@@ -130,7 +129,7 @@ Vtiger.Class("Control_Layout_Fields_Js",{
                                         $.each(this_field, function (i, e) {
                                             var parent_tr = $(e).closest('tr.relatedRecords');
                                             if (!parent_tr.hasClass('relatedRecordsClone')) {
-                                                var check_condition = thisInstance.checkConditionToForm(all_condition, any_condition, $(e), '', role_id, $(e).val());
+                                                var check_condition = thisInstance.checkConditionToForm(all_condition, any_condition, $(e), '', role_id, $(e).val(), 'Edit');
                                                 if (check_condition) {
                                                     jQuery.each(actions, function (index, value) {
                                                         var form_element = parent_tr.find("[name *='" + value.field + "']");
@@ -171,9 +170,6 @@ Vtiger.Class("Control_Layout_Fields_Js",{
                                                         else if (value.option == 'mandatory') {
                                                             form_element.attr('data-rule-required','true');
                                                             form_element.addClass(condition_key+'-clf-mandatory');
-                                                        }
-                                                        else if (value.option == 'field_pop_out') {
-                                                            arrFieldsName.push(value.field.toString());
                                                         }
                                                     });
                                                 }
@@ -233,7 +229,7 @@ Vtiger.Class("Control_Layout_Fields_Js",{
                                 }
                             }
                             else{
-                                var check_condition = thisInstance.checkConditionToForm(all_condition,any_condition,field_name_changed,'',role_id,new_value);
+                                var check_condition = thisInstance.checkConditionToForm(all_condition,any_condition,field_name_changed,'',role_id,new_value, 'Edit');
                                 if(check_condition){
                                     jQuery.each(actions,function(key,value){
                                         var field_name_action = value.field;
@@ -282,8 +278,6 @@ Vtiger.Class("Control_Layout_Fields_Js",{
                                                 this_td.prev().hide();
                                                 var this_tr = this_td.closest('tr');
                                                 thisInstance.hideTr(this_tr);
-                                            } else if (value.option == 'field_pop_out') {
-                                                arrFieldsName.push(value.field.toString());
                                             }
                                             if (form_element.is('select')) form_element.trigger('liszt:updated');
                                             //END
@@ -352,31 +346,6 @@ Vtiger.Class("Control_Layout_Fields_Js",{
                             }
                             condition_key++;
                         });
-                        
-                                
-                        /* if (arrFieldsName.length > 0) {
-                            var params = {
-                                module : 'ControlLayoutFields',
-                                view : 'QuickEditAjax',
-                                moduleEditName : module,
-                                record : $('[name="record"]').val(),
-                                arrFieldsName : arrFieldsName
-                            };
-                            app.request.post({'data': params}).then(function(err, data) {
-                                if (err || !data) {
-
-                                } else {
-                                    app.helper.showModal(data,{'cb' : function (data){
-                                        var quickEditForm = data.find('form[name="vteControlLayoutFieldsQuickEdit"]');
-                                        var moduleName = quickEditForm.find('[name="module"]').val();
-                                        var editViewInstance = Vtiger_Edit_Js.getInstanceByModuleName(moduleName);
-                                        editViewInstance.registerBasicEvents(quickEditForm);
-                                        quickEditForm.vtValidate(app.validationEngineOptions);
-                                        thisInstance.registerControlLayoutFieldsPostLoadEvents(quickEditForm);
-                                    }});
-                                }
-                            });
-                        } */
                     }
                 }
             }
@@ -407,7 +376,7 @@ Vtiger.Class("Control_Layout_Fields_Js",{
         });
         return list_fields;
     },
-    displayByClfOnDetail:function(moduleName,requestMode, fieldChangedName,record_id,blockid,new_value){
+    displayByClfOnDetail:function(moduleName, requestMode, fieldChangedName, record_id, blockid, new_value){
         var thisInstance = this;
         //to integrate with Custom View & Form
         if(moduleName == "CustomFormsViews"){
@@ -420,12 +389,11 @@ Vtiger.Class("Control_Layout_Fields_Js",{
             action : 'ActionAjax',
             mode : 'checkCLFForModule',
             current_module : moduleName,
-            record_id:record_id
+            record_id : jQuery('#recordId').val()
         };
         app.request.post({'data': params}).then(
             function(err,data){
                 if(err === null) {
-                    var arrFieldsName = [];
                     if (!jQuery.isEmptyObject(data)) {
                         var record_info = data.record_info;
                         var role_id = data.role_id;
@@ -463,7 +431,7 @@ Vtiger.Class("Control_Layout_Fields_Js",{
                                             if (!parent_tr.hasClass('relatedRecordsClone')) {
                                                 var value_to_check = $(e).val();
                                                 if(new_value != "") value_to_check = new_value;
-                                                var check_condition = thisInstance.checkConditionToForm(all_condition, any_condition, $(e), record_info, role_id, value_to_check);
+                                                var check_condition = thisInstance.checkConditionToForm(all_condition, any_condition, $(e), record_info, role_id, value_to_check, 'Edit');
                                                 if (check_condition) {
                                                     jQuery.each(actions, function (index, value) {
                                                         var this_action_field = parent_tr.find("[name *='" + value.field + "']");
@@ -501,9 +469,6 @@ Vtiger.Class("Control_Layout_Fields_Js",{
                                                                 target_element.attr('data-rule-required', 'true');
                                                                 if (target_element.is('select')) target_element.trigger('liszt:updated');
                                                             }
-                                                        }
-                                                        else if (value.option == 'field_pop_out') {
-                                                            arrFieldsName.push(value.field.toString());
                                                         }
                                                     });
                                                 }
@@ -560,9 +525,6 @@ Vtiger.Class("Control_Layout_Fields_Js",{
                                                                 if (target_element.is('select')) target_element.trigger('liszt:updated');
                                                             }
                                                         }
-                                                        else if (value.option == 'field_pop_out') {
-                                                            arrFieldsName.push(value.field.toString());
-                                                        }
                                                     });
                                                     
                                                 }
@@ -572,11 +534,12 @@ Vtiger.Class("Control_Layout_Fields_Js",{
                                 }
                             }
                             else{
-                                var check_condition = thisInstance.checkConditionToForm(all_condition, any_condition, fieldChangedName,record_info,role_id,'');
+                                var check_condition = thisInstance.checkConditionToForm(all_condition, any_condition, fieldChangedName,record_info,role_id,'', 'Edit');
                                 if (check_condition) {
                                     jQuery.each(actions, function (index, value) {
-                                        if (requestMode !== undefined && requestMode == 'full') {
+                                        if (requestMode !== undefined && (requestMode === 'full' || requestMode === 'summary')) {
                                             var target_td = jQuery("#" + moduleName + "_detailView_fieldValue_" + value.field);
+                                            if (requestMode === 'summary') target_td = jQuery('[data-name="' + value.field + '"]').closest('td').children('div:first');
                                             var target_value = target_td.children('span:first').html();
                                             if (target_td.children('span:first').data('field-type') == 'url') {
                                                 target_value = target_td.children('span:first').children('a').html();
@@ -612,8 +575,6 @@ Vtiger.Class("Control_Layout_Fields_Js",{
                                                     target_element.attr('data-rule-required', 'true');
                                                     if(target_element.is('select')) target_element.trigger('liszt:updated');
                                                 }
-                                            } else if (value.option == 'field_pop_out') {
-                                                arrFieldsName.push(value.field.toString());
                                             }
                                         }
                                         else {
@@ -635,9 +596,6 @@ Vtiger.Class("Control_Layout_Fields_Js",{
                                                 }
                                                 else if (value.option == 'mandatory') {
                                                     target_element.attr('data-rule-required', 'true');
-                                                }
-                                                else if (value.option == 'field_pop_out') {
-                                                    arrFieldsName.push(value.field.toString());
                                                 }
                                             }else{
                                                 //Detail View
@@ -675,9 +633,6 @@ Vtiger.Class("Control_Layout_Fields_Js",{
                                                 target_element.attr('data-rule-required', 'true');
                                                 if(target_element.is('select')) target_element.trigger('liszt:updated');
                                             }
-                                            else if (value.option == 'field_pop_out') {
-                                                arrFieldsName.push(value.field.toString());
-                                            }
                                         }
                                     }
                                 });
@@ -691,7 +646,103 @@ Vtiger.Class("Control_Layout_Fields_Js",{
                                 }
                             }
                         });
-                        if (arrFieldsName.length > 0) {
+                    }
+                }
+            }
+        );
+    },
+    displayByClfOnDetailFieldPopOut:function(moduleName, requestMode, fieldPopOut, fieldChangedName, record_id, blockid, new_value){
+        var thisInstance = this;
+        //to integrate with Custom View & Form
+        if(moduleName == "CustomFormsViews"){
+            var top_url = window.location.href.split('?');
+            var array_url = thisInstance.getQueryParams(top_url[1]);
+            moduleName = array_url.currentModule;
+        }
+        var params = {
+            module : 'ControlLayoutFields',
+            action : 'ActionAjax',
+            mode : 'checkCLFForModule',
+            current_module : moduleName,
+            record_id : jQuery('#recordId').val()
+        };
+        app.request.post({'data': params}).then(
+            function(err,data){
+                if(err === null) {
+                    var arrFieldsName = [];
+                    if (!jQuery.isEmptyObject(data)) {
+                        var record_info = data.record_info;
+                        var role_id = data.role_id;
+                        if($('#hd_clf_info_' + moduleName).length == 0){
+                            jQuery('<input>').attr({
+                                type: 'hidden',
+                                id: 'hd_clf_info_' + moduleName,
+                                value:JSON.stringify(data.clf_info)
+                            }).appendTo(jQuery('#detailView'));
+                        }
+                        else{
+                            $('#hd_clf_info_' + moduleName).val(JSON.stringify(data.clf_info));
+                        }
+                        jQuery.each(data.clf_info,function(k,v) {
+                            var all_condition = v.condition.all;
+                            var any_condition = v.condition.any;
+                            var actions = v.actions;
+                            var condition_key = k;
+                            if(blockid > 0){
+                                var is_block = false;
+                                var fields_on_conditions = thisInstance.getFieldOnConditions(all_condition,any_condition);
+                                if(fields_on_conditions.length > 0) {
+                                    $.each(fields_on_conditions, function (index,field_name) {
+                                        var this_field = $('.relatedblockslists' +blockid ).find("[name *='" + field_name + "']");
+                                        $.each(this_field, function (i, e) {
+                                            var parent_tr = $(e).closest('tr.relatedRecords');
+                                            var record_row_id =  parent_tr.data('id');
+                                            if(typeof record_row_id == "undefined"){
+                                                //is_block = true;
+                                                record_row_id = parent_tr.closest('div.blockData').data('id');
+                                            }
+                                            if(record_id > 0 && new_value != "" && record_row_id > 0){
+                                                if(record_row_id != record_id) return;
+                                            }
+                                            if (!parent_tr.hasClass('relatedRecordsClone')) {
+                                                var value_to_check = $(e).val();
+                                                if(new_value != "") value_to_check = new_value;
+                                                var check_condition = thisInstance.checkConditionToForm(all_condition, any_condition, $(e), record_info, role_id, value_to_check, 'Detail');
+                                                if (check_condition) {
+                                                    jQuery.each(actions, function (index, value) {
+                                                        //return;
+                                                        if (value.option == 'field_pop_out' && fieldPopOut === true) {
+                                                            if (arrFieldsName.indexOf(value.field.toString()) === -1)
+                                                            arrFieldsName.push(value.field.toString());
+                                                        }
+                                                    });
+                                                }
+                                            }
+                                        });
+                                    });
+                                }
+                            }
+                            else{
+                                var check_condition = thisInstance.checkConditionToForm(all_condition, any_condition, fieldChangedName,record_info,role_id,'', 'Detail');
+                                if (check_condition) {
+                                    jQuery.each(actions, function (index, value) {
+                                        if (requestMode !== undefined && (requestMode === 'full' || requestMode === 'summary')) {
+                                            if (value.option == 'field_pop_out' && fieldPopOut === true) {
+                                                if (arrFieldsName.indexOf(value.field.toString()) === -1) arrFieldsName.push(value.field.toString());
+                                            }
+                                        }
+                                    });
+                                    //remove all empty block
+                                    jQuery.each(jQuery('#detailView').find('.detailview-table'), function () {
+                                        var row_count = jQuery(this).find('tr').length;
+                                        if (row_count == 0) jQuery(this).hide();
+                                    });
+
+                                    //return false;
+                                }
+                            }
+                        });
+                        if (record_id && arrFieldsName.length > 0) {
                             var params = {
                                 module : 'ControlLayoutFields',
                                 view : 'QuickEditAjax',
@@ -851,7 +902,7 @@ Vtiger.Class("Control_Layout_Fields_Js",{
         return new Date(dateItems[yearIndex],month,dateItems[dayIndex]);
     },
     //this function to check condition from config to dispay control on form
-    checkConditionToForm:function(all_condition,any_condition,field_name_changed,record_info,role_id,new_value){
+    checkConditionToForm:function(all_condition,any_condition,field_name_changed,record_info,role_id,new_value,mode){
         var thisInstance = this;
         var is_all = false;
         var is_any = false;
@@ -867,87 +918,175 @@ Vtiger.Class("Control_Layout_Fields_Js",{
             var comparator =  value.comparator;
             var main_form = jQuery('#EditView');
             var form_element = main_form.find('[name="'+field_name+'"]');
-            if(field_name_changed == 'clf_details'){
-                main_form = jQuery('#detailView');
-                form_element = main_form.find('[data-name="'+field_name+'"]');
-            }
-            if(typeof form_element == 'undefined' && field_name == 'total'){
-                form_element = jQuery('#EditView').find('[name="grandTotal"]');
-            }
-            if(!form_element.length){
-                form_element = jQuery('[data-name="' +field_name+ '"]');
-                form_element.val(form_element.attr('data-value'));
-            }
-            var form_element_value = form_element.val();
-            if(!form_element.length && field_name == "accountname"){
-                form_element_value = jQuery('[name="account_id"],[name="related_to"]').data('displayvalue');
-            }
-            if(form_element.length && form_element.hasClass('sourceField')){
-                form_element_value = form_element.data('displayvalue');
-            }
-            if(field_name_changed == 'clf_details') {
-                if(form_element.data("type") != "reference"){
-                    form_element_value = form_element.data("value");
+            if(mode === 'Edit') {
+                if(field_name_changed == 'clf_details'){
+                    main_form = jQuery('#detailView');
+                    form_element = main_form.find('[data-name="'+field_name+'"]');
                 }
-                else{
-                    var link = form_element.data("displayvalue");
-                    form_element_value = $(link).html();
+                if(typeof form_element == 'undefined' && field_name == 'total'){
+                    form_element = jQuery('#EditView').find('[name="grandTotal"]');
                 }
-
-            }
-            if(typeof form_element_value == 'undefined' && field_name_changed == 'clf_details'){
-                if(typeof thisInstance.fieldValuesCache[field_name] == 'undefined') {
-                    form_element_value = record_info[field_name];
-                    thisInstance.fieldValuesCache[field_name] = form_element_value;
-                }else{
-                    form_element_value = thisInstance.fieldValuesCache[field_name];
+                if(!form_element.length){
+                    form_element = jQuery('[data-name="' +field_name+ '"]');
+                    form_element.val(form_element.attr('data-value'));
                 }
-            }
-            if( field_name_changed == 'parent_id') {
-                if (new_value != '' && typeof form_element_value == 'undefined') form_element_value = new_value;
-            }
-            if(form_element.attr('type') == 'hidden'){
-                form_element = form_element.next();
-                if(!form_element.is('input')){
-                    form_element = form_element.next('select');
-                    if(form_element.val()) form_element_value = form_element.val().join(',');
+                var form_element_value = form_element.val();
+                if(!form_element.length && field_name == "accountname"){
+                    form_element_value = jQuery('[name="account_id"],[name="related_to"]').data('displayvalue');
                 }
-                else{
-                    if(form_element.attr('type') == 'checkbox'){
-                        if (form_element.is(":checked"))
-                        {
-                            form_element_value = 1;
+                if(form_element.length && form_element.hasClass('sourceField')){
+                    form_element_value = form_element.data('displayvalue');
+                }
+                if(field_name_changed == 'clf_details') {
+                    if(form_element.data("type") != "reference"){
+                        form_element_value = form_element.data("value");
+                    }
+                    else{
+                        var link = form_element.data("displayvalue");
+                        form_element_value = $(link).html();
+                    }
+    
+                }
+                if(typeof form_element_value == 'undefined' && field_name_changed == 'clf_details'){
+                    if(typeof thisInstance.fieldValuesCache[field_name] == 'undefined') {
+                        form_element_value = record_info[field_name];
+                        thisInstance.fieldValuesCache[field_name] = form_element_value;
+                    }else{
+                        form_element_value = thisInstance.fieldValuesCache[field_name];
+                    }
+                }
+                if( field_name_changed == 'parent_id') {
+                    if (new_value != '' && typeof form_element_value == 'undefined') form_element_value = new_value;
+                }
+                if(form_element.attr('type') == 'hidden'){
+                    form_element = form_element.next();
+                    if(!form_element.is('input')){
+                        form_element = form_element.next('select');
+                        if(form_element.val()) form_element_value = form_element.val().join(',');
+                    }
+                    else{
+                        if(form_element.attr('type') == 'checkbox'){
+                            if (form_element.is(":checked"))
+                            {
+                                form_element_value = 1;
+                            }
+                            else{
+                                form_element_value = 0;
+                            }
+    
+                        }
+                    }
+                }
+                if(field_name == "roleid"){
+                    form_element_value = role_id;
+                }
+                if(typeof form_element_value == "undefined"){
+                    form_element = main_form.find('[name*="'+field_name+'"]');
+                    if(form_element.length > 0) form_element_value = form_element.val();
+                }
+                if(form_element.length >= 2) {
+                    $.each(form_element, function (i, e) {
+                        var parent_tr = $(e).closest('tr');
+                        if (parent_tr.hasClass('relatedRecords')){
+                            form_element_value = $(e).val();
+                            return;
+                        }
+                    });
+                }
+                if(form_element_value !== undefined){
+                    var result = thisInstance.checkCondition(form_element_value,comparator,field_value,field_name_changed,field_name);
+                    if(result == true){
+                        is_all = result;
+                    }else{
+                        is_all = false;
+                        return false;
+                    }
+                }
+            } else if(mode === 'Detail') {
+                if (field_name_changed === field_name) {
+                    if(field_name_changed == 'clf_details'){
+                        main_form = jQuery('#detailView');
+                        form_element = main_form.find('[data-name="'+field_name+'"]');
+                    }
+                    if(typeof form_element == 'undefined' && field_name == 'total'){
+                        form_element = jQuery('#detailView').find('[name="grandTotal"]');
+                    }
+                    if(!form_element.length){
+                        form_element = jQuery('[data-name="' +field_name+ '"]');
+                        form_element.val(form_element.attr('data-value'));
+                    }
+                    var form_element_value = form_element.val();
+                    if(!form_element.length && field_name == "accountname"){
+                        form_element_value = jQuery('[name="account_id"],[name="related_to"]').data('displayvalue');
+                    }
+                    if(form_element.length && form_element.hasClass('sourceField')){
+                        form_element_value = form_element.data('displayvalue');
+                    }
+                    if(field_name_changed == 'clf_details') {
+                        if(form_element.data("type") != "reference"){
+                            form_element_value = form_element.data("value");
                         }
                         else{
-                            form_element_value = 0;
+                            var link = form_element.data("displayvalue");
+                            form_element_value = $(link).html();
                         }
-
+        
                     }
-                }
-            }
-            if(field_name == "roleid"){
-                form_element_value = role_id;
-            }
-            if(typeof form_element_value == "undefined"){
-                form_element = main_form.find('[name*="'+field_name+'"]');
-                if(form_element.length > 0) form_element_value = form_element.val();
-            }
-            if(form_element.length >= 2) {
-                $.each(form_element, function (i, e) {
-                    var parent_tr = $(e).closest('tr');
-                    if (parent_tr.hasClass('relatedRecords')){
-                        form_element_value = $(e).val();
-                        return;
+                    if(typeof form_element_value == 'undefined' && field_name_changed == 'clf_details'){
+                        if(typeof thisInstance.fieldValuesCache[field_name] == 'undefined') {
+                            form_element_value = record_info[field_name];
+                            thisInstance.fieldValuesCache[field_name] = form_element_value;
+                        }else{
+                            form_element_value = thisInstance.fieldValuesCache[field_name];
+                        }
                     }
-                });
-            }
-            if(form_element_value !== undefined){
-                var result = thisInstance.checkCondition(form_element_value,comparator,field_value,field_name_changed,field_name);
-                if(result == true){
-                    is_all = result;
-                }else{
-                    is_all = false;
-                    return false;
+                    if( field_name_changed == 'parent_id') {
+                        if (new_value != '' && typeof form_element_value == 'undefined') form_element_value = new_value;
+                    }
+                    if(form_element.attr('type') == 'hidden'){
+                        form_element = form_element.next();
+                        if(!form_element.is('input')){
+                            form_element = form_element.next('select');
+                            if(form_element.val()) form_element_value = form_element.val().join(',');
+                        }
+                        else{
+                            if(form_element.attr('type') == 'checkbox'){
+                                if (form_element.is(":checked"))
+                                {
+                                    form_element_value = 1;
+                                }
+                                else{
+                                    form_element_value = 0;
+                                }
+        
+                            }
+                        }
+                    }
+                    if(field_name == "roleid"){
+                        form_element_value = role_id;
+                    }
+                    if(typeof form_element_value == "undefined"){
+                        form_element = main_form.find('[name*="'+field_name+'"]');
+                        if(form_element.length > 0) form_element_value = form_element.val();
+                    }
+                    if(form_element.length >= 2) {
+                        $.each(form_element, function (i, e) {
+                            var parent_tr = $(e).closest('tr');
+                            if (parent_tr.hasClass('relatedRecords')){
+                                form_element_value = $(e).val();
+                                return;
+                            }
+                        });
+                    }
+                    if(form_element_value !== undefined){
+                        var result = thisInstance.checkCondition(form_element_value,comparator,field_value,field_name_changed,field_name);
+                        if(result == true){
+                            is_all = result;
+                        }else{
+                            is_all = false;
+                            return false;
+                        }
+                    }
                 }
             }
         });
@@ -956,52 +1095,54 @@ Vtiger.Class("Control_Layout_Fields_Js",{
             var field_value =  value.value;
             var comparator =  value.comparator;
             var form_element = jQuery('#EditView').find('[name="'+field_name+'"]');
-            if(field_name_changed == 'clf_details'){
-                form_element = jQuery('#detailView').find('[name="'+field_name+'"]');
-            }
-            if(typeof form_element == 'undefined' && field_name == 'total'){
-                form_element = jQuery('#detailView').find('[name="grandTotal"]');
-            }
-            if(!form_element.length){
-                form_element = jQuery('[data-name="' +field_name+ '"]');
-                form_element.val(form_element.attr('data-value'));
-            }
-            var form_element_value = form_element.val();
-            if(typeof form_element_value == 'undefined' && field_name_changed == 'clf_details'){
-                var record_info = thisInstance.getRecordIdAndModule();
-                if(typeof thisInstance.fieldValuesCache[field_name] == 'undefined') {
-                    jQuery.each(record_info,function(key,value){
-                        if(key == field_name) form_element_value = value;
-                    });
-                    thisInstance.fieldValuesCache[field_name] = form_element_value;
-                }else{
-                    form_element_value = thisInstance.fieldValuesCache[field_name];
+            if (field_name_changed === field_name) {
+                if(field_name_changed == 'clf_details'){
+                    form_element = jQuery('#detailView').find('[name="'+field_name+'"]');
                 }
-            }
-            //for Multiple Value control
-            if(form_element.attr('type') == 'hidden'){
-                form_element = form_element.next();
-                if(!form_element.is('input')){
-                    form_element = form_element.next('select');
-                    if(form_element.val()) form_element_value = form_element.val().join(',');
+                if(typeof form_element == 'undefined' && field_name == 'total'){
+                    form_element = jQuery('#detailView').find('[name="grandTotal"]');
                 }
-                else{
-                    if(form_element.attr('type') == 'checkbox'){
-                        if (form_element.is(":checked"))
-                        {
-                            form_element_value = 1;
-                        }
-                        else{
-                            form_element_value = 0;
-                        }
-
+                if(!form_element.length){
+                    form_element = jQuery('[data-name="' +field_name+ '"]');
+                    form_element.val(form_element.attr('data-value'));
+                }
+                var form_element_value = form_element.val();
+                if(typeof form_element_value == 'undefined' && field_name_changed == 'clf_details'){
+                    var record_info = thisInstance.getRecordIdAndModule();
+                    if(typeof thisInstance.fieldValuesCache[field_name] == 'undefined') {
+                        jQuery.each(record_info,function(key,value){
+                            if(key == field_name) form_element_value = value;
+                        });
+                        thisInstance.fieldValuesCache[field_name] = form_element_value;
+                    }else{
+                        form_element_value = thisInstance.fieldValuesCache[field_name];
                     }
                 }
-            }
-            if(typeof form_element_value == "undefined") return false;
-            var result = thisInstance.checkCondition(form_element_value,comparator,field_value,field_name_changed,field_name);
-            if(result){
-                is_any = true;
+                //for Multiple Value control
+                if(form_element.attr('type') == 'hidden'){
+                    form_element = form_element.next();
+                    if(!form_element.is('input')){
+                        form_element = form_element.next('select');
+                        if(form_element.val()) form_element_value = form_element.val().join(',');
+                    }
+                    else{
+                        if(form_element.attr('type') == 'checkbox'){
+                            if (form_element.is(":checked"))
+                            {
+                                form_element_value = 1;
+                            }
+                            else{
+                                form_element_value = 0;
+                            }
+    
+                        }
+                    }
+                }
+                if(typeof form_element_value == "undefined") return false;
+                var result = thisInstance.checkCondition(form_element_value,comparator,field_value,field_name_changed,field_name);
+                if(result){
+                    is_any = true;
+                }
             }
         });
         return is_all && is_any;
@@ -1356,8 +1497,6 @@ Vtiger.Class("Control_Layout_Fields_Js",{
                                         this_td.prev().hide();
                                         var this_tr = this_td.closest('tr');
                                         thisInstance.hideTr(this_tr);
-                                    } else if(value.option == 'field_pop_out') {
-                                        arrFieldsName.push(value.field.toString());
                                     }
                                     if(form_element.is('select')) form_element.trigger('liszt:updated');
                                     //END
@@ -1423,29 +1562,6 @@ Vtiger.Class("Control_Layout_Fields_Js",{
                             }
                             condition_key++;
                         });
-                        if (arrFieldsName.length > 0) {
-                            var params = {
-                                module : 'ControlLayoutFields',
-                                view : 'QuickEditAjax',
-                                moduleEditName : module,
-                                record : $('[name="record"]').val(),
-                                arrFieldsName : arrFieldsName
-                            };
-                            app.request.post({'data': params}).then(function(err, data) {
-                                if (err || !data) {
-
-                                } else {
-                                    app.helper.showModal(data,{'cb' : function (data){
-                                        var quickEditForm = data.find('form[name="vteControlLayoutFieldsQuickEdit"]');
-                                        var moduleName = quickEditForm.find('[name="module"]').val();
-                                        var editViewInstance = Vtiger_Edit_Js.getInstanceByModuleName(moduleName);
-                                        editViewInstance.registerBasicEvents(quickEditForm);
-                                        quickEditForm.vtValidate(app.validationEngineOptions);
-                                        thisInstance.registerControlLayoutFieldsPostLoadEvents(quickEditForm);
-                                    }});
-                                }
-                            });
-                        }
                     }
                 }
             }
@@ -1507,8 +1623,8 @@ jQuery(document).ready(function(){
         if(typeof array_url == 'undefined') return false;
         var request_mode = array_url.requestMode;
         var record_id = jQuery('#recordId').val();
-        clfInstance.displayByClfOnDetail(module,request_mode,fieldChangedName,record_id);
-        fieldChangedName = '';
+        clfInstance.displayByClfOnDetail(module,request_mode);
+        clfInstance.displayByClfOnDetailFieldPopOut(module,request_mode, false);
         clfInstance.registerInlineAjaxSaveClickEvent();
     }
 });
@@ -1522,6 +1638,9 @@ jQuery( document ).ajaxComplete(function(event, xhr, settings) {
     }
     // Only load when loadHeaderScript=1 END #241208
 
+    jQuery("#detailView,.relatedblockslists_records").on("change", "input,select,textarea", function () {
+        fieldChangedName = jQuery(this).attr('name');
+    });
     var url = settings.data;
     if(typeof url == 'undefined' && settings.url) url = settings.url;
     var instance = new Control_Layout_Fields_Js();
@@ -1566,6 +1685,7 @@ jQuery( document ).ajaxComplete(function(event, xhr, settings) {
                 var block_id = relatedblockslists_records.closest('.relatedblockslists_records').data('block-id');
                 var module_reference = other_url.module;
                 instance.displayByClfOnDetail(module_reference,request_mode, fieldChangedName,record_id,block_id,new_value);
+                instance.displayByClfOnDetailFieldPopOut(module_reference,request_mode, true, fieldChangedName,record_id,block_id,new_value);
                 fieldChangedName = '';
             }else{
                 $('.tab-item.active').trigger('click');
@@ -1573,9 +1693,13 @@ jQuery( document ).ajaxComplete(function(event, xhr, settings) {
             //END
         }
     }
-    else if(array_url.view == 'Detail'&& other_url.mode == 'showDetailViewByMode'){
+    else if(array_url.view == 'Detail' && other_url.mode == 'showDetailViewByMode'){
+        jQuery("#detailView,.relatedblockslists_records").on("change", "input,select,textarea", function () {
+            fieldChangedName = jQuery(this).attr('name');
+        });
         var record_id = jQuery('#recordId').val();
         instance.displayByClfOnDetail(array_url.module,request_mode, fieldChangedName,record_id);
+        instance.displayByClfOnDetailFieldPopOut(array_url.module,request_mode, true, fieldChangedName,record_id);
         fieldChangedName = '';
         instance.registerInlineAjaxSaveClickEvent();
     }
@@ -1588,6 +1712,7 @@ jQuery( document ).ajaxComplete(function(event, xhr, settings) {
         if(other_url.module == 'VTETabs' && other_url.view == 'DetailViewAjax' && other_url.mode == 'showModuleDetailView') {
             var record_id = jQuery('#recordId').val();
             instance.displayByClfOnDetail(array_url.module,request_mode, fieldChangedName,record_id);
+            instance.displayByClfOnDetailFieldPopOut(array_url.module,request_mode, true, fieldChangedName,record_id);
             fieldChangedName = '';
             instance.registerInlineAjaxSaveClickEvent();
         }
@@ -1610,6 +1735,7 @@ jQuery( document ).ajaxComplete(function(event, xhr, settings) {
             if(relatedblockslists_records.length > 0){
                 var module = relatedblockslists_records.data('rel-module');
                 instance.displayByClfOnDetail(module,request_mode, fieldChangedName,record_id,blockid,"");
+                instance.displayByClfOnDetailFieldPopOut(module,request_mode, true, fieldChangedName,record_id,blockid,"");
                 fieldChangedName = '';
                 instance.registerInlineAjaxSaveClickEvent();
                 instance.registerFormChange(module);
@@ -1622,7 +1748,7 @@ jQuery( document ).ajaxComplete(function(event, xhr, settings) {
     //pham@vtexperts.com
     if(Object.prototype.toString.call(url) =='[object String]' && url.indexOf('module=VTEButtons') != -1 && url.indexOf('view=QuickEditAjax') != -1){
         var clfInstance = new Control_Layout_Fields_Js();
-        clfInstance.registerVTEButtonPopupEvents();
+        clfInstance.registerVTEButtonPopupEvents(); 
     }
     //1205661 END
 });
