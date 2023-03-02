@@ -188,6 +188,8 @@ Vtiger.Class("Control_Layout_Fields_Js",{
                                                         if(form_element.length > 0){
                                                             var data_info = form_element.data('fieldinfo');
                                                             if(form_element.hasClass(condition_key+'-clf-mandatory')){
+                                                                $.extend($('#EditView').vtValidate().settings.rules[form_element.attr('name')], {required: false});
+                                                                vtUtils.hideValidationMessage(form_element);
                                                                 form_element.removeAttr('data-rule-required');
                                                                 form_element.removeAttr('aria-required');
                                                                 form_element.removeAttr('aria-invalid');
@@ -301,12 +303,13 @@ Vtiger.Class("Control_Layout_Fields_Js",{
                                             }
                                             var data_info = form_element.data('fieldinfo');
                                             if (form_element.hasClass(condition_key + '-clf-mandatory')) {
+                                                vtUtils.hideValidationMessage(form_element);
+                                                $.extend($('#EditView').vtValidate().settings.rules[form_element.attr('name')], {required: false});
                                                 var field_label = form_element.closest('td').prev();
                                                 if (field_label.length) field_label.find('span.redColor').remove();
                                                 form_element.removeAttr('data-rule-required');
-                                                form_element.removeAttr('aria-required');
-                                                form_element.removeAttr('aria-invalid');
-                                                form_element.removeAttr('data-rule-illegal');
+                                                form_element.attr('aria-required', 'false');
+                                                form_element.attr('aria-invalid', 'false');
                                                 form_element.removeClass(condition_key + '-clf-mandatory');
                                             }
                                             if (form_element.hasClass(condition_key + '-clf-read-only')) {
@@ -1232,9 +1235,6 @@ Vtiger.Class("Control_Layout_Fields_Js",{
             else{
                 return true;
             }
-        });
-        listViewContentDiv.on('click','.inlineAjaxSave',function(e){
-
         });
     },
     waitUntil : function (waitFor,toDo){
