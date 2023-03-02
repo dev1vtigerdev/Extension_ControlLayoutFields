@@ -168,6 +168,7 @@ Vtiger.Class("Control_Layout_Fields_Js",{
                                                             }
                                                         }
                                                         else if (value.option == 'mandatory') {
+                                                            $.extend($('#EditView').vtValidate().settings.rules[form_element.attr('name')], {required: true});
                                                             form_element.attr('data-rule-required','true');
                                                             form_element.addClass(condition_key+'-clf-mandatory');
                                                         }
@@ -254,6 +255,7 @@ Vtiger.Class("Control_Layout_Fields_Js",{
                                             if (value.option == 'mandatory') {
                                                 this_td.show();
                                                 this_td.prev().show();
+                                                $.extend($('#EditView').vtValidate().settings.rules[form_element.attr('name')], {required: true});
                                                 form_element.attr('data-rule-required', 'true');
                                                 form_element.addClass(condition_key + '-clf-mandatory');
                                                 form_element.css('display', '');
@@ -308,8 +310,8 @@ Vtiger.Class("Control_Layout_Fields_Js",{
                                                 var field_label = form_element.closest('td').prev();
                                                 if (field_label.length) field_label.find('span.redColor').remove();
                                                 form_element.removeAttr('data-rule-required');
-                                                form_element.attr('aria-required', 'false');
-                                                form_element.attr('aria-invalid', 'false');
+                                                form_element.removeAttr('aria-required');
+                                                form_element.removeAttr('aria-invalid');
                                                 form_element.removeClass(condition_key + '-clf-mandatory');
                                             }
                                             if (form_element.hasClass(condition_key + '-clf-read-only')) {
@@ -469,6 +471,7 @@ Vtiger.Class("Control_Layout_Fields_Js",{
                                                         else if (value.option == 'mandatory') {
                                                             var target_element = target_td.find('[name*=' + value.field + ']');
                                                             if (target_element.length > 0) {
+                                                                $.extend($('#detailView').vtValidate().settings.rules[target_element.attr('name')], {required: true});
                                                                 target_element.attr('data-rule-required', 'true');
                                                                 if (target_element.is('select')) target_element.trigger('liszt:updated');
                                                             }
@@ -524,6 +527,7 @@ Vtiger.Class("Control_Layout_Fields_Js",{
                                                         else if (value.option == 'mandatory') {
                                                             var target_element = target_td.find('[name=' + value.field + ']');
                                                             if (target_element.length > 0) {
+                                                                $.extend($('#detailView').vtValidate().settings.rules[target_element.attr('name')], {required: false});
                                                                 target_element.removeAttr('data-rule-required');
                                                                 if (target_element.is('select')) target_element.trigger('liszt:updated');
                                                             }
@@ -576,6 +580,7 @@ Vtiger.Class("Control_Layout_Fields_Js",{
                                                 var target_element = target_td.find('[name='+value.field+']');
                                                 if(target_element.length > 0){
                                                     target_element.attr('data-rule-required', 'true');
+                                                    $.extend($('#detailView').vtValidate().settings.rules[target_element.attr('name')], {required: true});
                                                     if(target_element.is('select')) target_element.trigger('liszt:updated');
                                                 }
                                             }
@@ -598,6 +603,7 @@ Vtiger.Class("Control_Layout_Fields_Js",{
                                                     target_span.remove();
                                                 }
                                                 else if (value.option == 'mandatory') {
+                                                    $.extend($('#detailView').vtValidate().settings.rules[target_element.attr('name')], {required: true});
                                                     target_element.attr('data-rule-required', 'true');
                                                 }
                                             }else{
@@ -634,6 +640,7 @@ Vtiger.Class("Control_Layout_Fields_Js",{
                                             else if (value.option == 'mandatory') {
                                                 var target_element = $('[data-name='+value.field+']');
                                                 target_element.attr('data-rule-required', 'true');
+                                                $.extend($('#detailView').vtValidate().settings.rules[target_element.attr('name')], {required: true});
                                                 if(target_element.is('select')) target_element.trigger('liszt:updated');
                                             }
                                         }
