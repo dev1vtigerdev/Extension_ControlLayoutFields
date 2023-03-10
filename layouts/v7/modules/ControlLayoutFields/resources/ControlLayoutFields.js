@@ -6,59 +6,59 @@
  * Portions created by vtiger are Copyright (C) vtiger.
  * All Rights Reserved.
  *************************************************************************************/
-Vtiger.Class("Control_Layout_Fields_Js",{
-},{
+Vtiger.Class("Control_Layout_Fields_Js", {
+}, {
     fieldValuesCache: {},
     /*
      * Function to register the change module filter
      */
-    registerModuleFilterChange:function(){
-        jQuery('#clfModuleFilter').on('change',function(){
+    registerModuleFilterChange: function () {
+        jQuery('#clfModuleFilter').on('change', function () {
             var filter_value = jQuery(this).val();
             window.location.href = 'index.php?module=ControlLayoutFields&parent=Settings&view=ListAll&mode=listAll&ModuleFilter=' + filter_value;
         });
     },
-    registerPagingAction:function(){
+    registerPagingAction: function () {
         var current_page = jQuery('#current_page').val();
         var filter_value = jQuery('#clfModuleFilter').val();
-        jQuery('#clfListViewNextPageButton').on('click',function(){
-            window.location.href = 'index.php?module=ControlLayoutFields&parent=Settings&view=ListAll&mode=listAll&ModuleFilter=' + filter_value+'&page='+(parseInt(current_page) + 1);
+        jQuery('#clfListViewNextPageButton').on('click', function () {
+            window.location.href = 'index.php?module=ControlLayoutFields&parent=Settings&view=ListAll&mode=listAll&ModuleFilter=' + filter_value + '&page=' + (parseInt(current_page) + 1);
         });
-        jQuery('#clfListViewPreviousPageButton').on('click',function(){
-            window.location.href = 'index.php?module=ControlLayoutFields&parent=Settings&view=ListAll&mode=listAll&ModuleFilter=' + filter_value+'&page='+(parseInt(current_page) - 1);
+        jQuery('#clfListViewPreviousPageButton').on('click', function () {
+            window.location.href = 'index.php?module=ControlLayoutFields&parent=Settings&view=ListAll&mode=listAll&ModuleFilter=' + filter_value + '&page=' + (parseInt(current_page) - 1);
         });
 
     },
-    registerDeleteAction:function(){
+    registerDeleteAction: function () {
         var current_page = jQuery('#current_page').val();
         var filter_value = jQuery('#clfModuleFilter').val();
-        jQuery('.removeCLF').on('click',function(){
+        jQuery('.removeCLF').on('click', function () {
             var recordId = jQuery(this).data('id');
             var message = app.vtranslate('Are you sure you want to delete this row?');
-            app.helper.showConfirmationBox({'message' : message}).then(
-                function(){
-                    window.location.href = 'index.php?module=ControlLayoutFields&parent=Settings&view=ListAll&mode=delete&record='+recordId+'&ModuleFilter=' + filter_value+'&page='+current_page;
+            app.helper.showConfirmationBox({ 'message': message }).then(
+                function () {
+                    window.location.href = 'index.php?module=ControlLayoutFields&parent=Settings&view=ListAll&mode=delete&record=' + recordId + '&ModuleFilter=' + filter_value + '&page=' + current_page;
                 },
-                function(error, err){
+                function (error, err) {
                 }
             );
         });
     },
-    registerEventClickOnRow:function(){
-        jQuery("[id^='ControlLayoutFields_listView_row_'] td").on('click',function(e){
-            if (e.target.nodeName == 'TD'){
+    registerEventClickOnRow: function () {
+        jQuery("[id^='ControlLayoutFields_listView_row_'] td").on('click', function (e) {
+            if (e.target.nodeName == 'TD') {
                 var url = $(this).closest("tr").attr("data-recordurl");
                 window.location.href = url;
             }
         });
     },
-    
-    registerControlLayoutFieldsPostLoadEvents: function(form) {
+
+    registerControlLayoutFieldsPostLoadEvents: function (form) {
         if (typeof submitSuccessCallbackFunction == 'undefined') {
-            submitSuccessCallbackFunction = function() {
+            submitSuccessCallbackFunction = function () {
             };
         }
-        form.find("button[name='vteControlLayoutFieldsSave']").on('click', function(e) {
+        form.find("button[name='vteControlLayoutFieldsSave']").on('click', function (e) {
             var form = jQuery(e.currentTarget).closest('form');
             var module = form.find('[name="module"]').val();
             var aDeferred = jQuery.Deferred();
@@ -70,18 +70,18 @@ Vtiger.Class("Control_Layout_Fields_Js",{
                     }
                     var formData = jQuery(frm).serialize();
                     app.helper.showProgress();
-                    app.request.post({data: formData}).then(function (err, data) {
+                    app.request.post({ data: formData }).then(function (err, data) {
                         if (!err) {
                             aDeferred.resolve(data);
-                            var parentModule=app.getModuleName();
-                            var viewname=app.getViewName();
-                            if((module == parentModule) && (viewname=="List")){
+                            var parentModule = app.getModuleName();
+                            var viewname = app.getViewName();
+                            if ((module == parentModule) && (viewname == "List")) {
                                 var listinstance = new Vtiger_List_Js();
                                 listinstance.getListViewRecords();
                             }
-                            app.helper.showSuccessNotification({"message": data});
+                            app.helper.showSuccessNotification({ "message": data });
                         } else {
-                            app.helper.showErrorNotification({"message": err});
+                            app.helper.showErrorNotification({ "message": err });
                         }
                         app.helper.hideModal();
                         app.helper.hideProgress();
@@ -94,135 +94,133 @@ Vtiger.Class("Control_Layout_Fields_Js",{
         });
     },
 
-    displayByClf:function(module,field_name_changed,new_value,blockid){
+    displayByClf: function (formname, module, field_name_changed, new_value, blockid) {
         var thisInstance = this;
         //to integrate with Custom View & Form
-        if(module == "CustomFormsViews"){
+        if (module == "CustomFormsViews") {
             var top_url = window.location.href.split('?');
             var array_url = thisInstance.getQueryParams(top_url[1]);
             module = array_url.currentModule;
         }
         var params = {
-            module : 'ControlLayoutFields',
-            action : 'ActionAjax',
-            mode : 'checkCLFForModule',
-            current_module : module
+            module: 'ControlLayoutFields',
+            action: 'ActionAjax',
+            mode: 'checkCLFForModule',
+            current_module: module
         };
-        app.request.post({'data': params}).then(
-            function(err,data){
-                if(err === null) {
-                    if(!jQuery.isEmptyObject(data)){
+        app.request.post({ 'data': params }).then(
+            function (err, data) {
+                if (err === null) {
+                    if (!jQuery.isEmptyObject(data)) {
                         var role_id = data.role_id;
-                        jQuery.each(data.clf_info,function(k,v){
+                        jQuery.each(data.clf_info, function (k, v) {
                             var all_condition = v.condition.all;
                             var any_condition = v.condition.any;
                             var actions = v.actions;
                             var condition_key = k;
-                            if(blockid > 0){
+                            if (blockid > 0) {
 
                                 console.log("blockid:" + blockid);
                                 var is_block = false;
-                                var fields_on_conditions = thisInstance.getFieldOnConditions(all_condition,any_condition);
-                                if(fields_on_conditions.length > 0) {
-                                    $.each(fields_on_conditions, function (index,field_name) {
-                                        var this_field = $('.relatedblockslists' +blockid ).find("[name*='" + field_name + "']");
+                                var fields_on_conditions = thisInstance.getFieldOnConditions(all_condition, any_condition);
+                                if (fields_on_conditions.length > 0) {
+                                    $.each(fields_on_conditions, function (index, field_name) {
+                                        var this_field = $('.relatedblockslists' + blockid).find("[name*='" + field_name + "']");
                                         $.each(this_field, function (i, e) {
                                             var parent_tr = $(e).closest('tr.relatedRecords');
                                             if (!parent_tr.hasClass('relatedRecordsClone')) {
-                                                var check_condition = thisInstance.checkConditionToForm(all_condition, any_condition, $(e), '', role_id, $(e).val(), 'Edit');
+                                                var check_condition = thisInstance.checkConditionToForm(all_condition, any_condition, $(e), '', role_id, $(e).val(), formname);
                                                 if (check_condition) {
                                                     jQuery.each(actions, function (index, value) {
                                                         var form_element = parent_tr.find("[name *='" + value.field + "']");
                                                         var target_td = form_element.closest('td');
                                                         var data_info = form_element.data('fieldname');
-                                                        if(target_td.length == 0) {
+                                                        if (target_td.length == 0) {
                                                             is_block = true;
                                                             form_element = parent_tr.closest('table').find("[name *='" + value.field + "']");
                                                             target_td = form_element.closest('td');
                                                         }
                                                         //return;
                                                         if (value.option == 'hide') {
-                                                            if(!is_block) {
+                                                            if (!is_block) {
                                                                 target_td.children().hide();
-                                                                form_element.addClass(condition_key+'-clf-hide');
+                                                                form_element.addClass(condition_key + '-clf-hide');
                                                             }
-                                                            else{
-                                                                form_element.addClass(condition_key+'-clf-hide');
+                                                            else {
+                                                                form_element.addClass(condition_key + '-clf-hide');
                                                                 target_td.children().hide();
-                                                                target_td.prev('td.fieldLabel').attr("data-label",target_td.prev('td.fieldLabel').html())
+                                                                target_td.prev('td.fieldLabel').attr("data-label", target_td.prev('td.fieldLabel').html())
                                                                 target_td.prev('td.fieldLabel').html('');
                                                             }
                                                         }
                                                         else if (value.option == 'read_only') {
-                                                            form_element.attr('readonly','readonly');
+                                                            form_element.attr('readonly', 'readonly');
                                                             //form_element.attr('disabled','disabled');
-                                                            form_element.css('background','rgb(235, 235, 228)');
-                                                            form_element.addClass(condition_key+'-clf-read-only');
-                                                            if (typeof data_info != 'undefined'){
-                                                                if(data_info.type == 'reference'){
+                                                            form_element.css('background', 'rgb(235, 235, 228)');
+                                                            form_element.addClass(condition_key + '-clf-read-only');
+                                                            if (typeof data_info != 'undefined') {
+                                                                if (data_info.type == 'reference') {
                                                                     var parent_span = form_element.closest('span');
                                                                     parent_span.find('div:first').hide();
-                                                                }else if(data_info.type == 'multipicklist'){
+                                                                } else if (data_info.type == 'multipicklist') {
                                                                     form_element.select2('disable');
                                                                 }
                                                             }
                                                         }
                                                         else if (value.option == 'mandatory') {
-                                                            $.extend($('#EditView').vtValidate().settings.rules[form_element.attr('name')], {required: true});
-                                                            form_element.attr('data-rule-required','true');
-                                                            form_element.addClass(condition_key+'-clf-mandatory');
+                                                            form_element.attr('data-rule-required', 'true');
+                                                            form_element.addClass(condition_key + '-clf-mandatory');
                                                         }
                                                     });
                                                 }
-                                                else{
-                                                    jQuery.each(actions,function(key,value){
+                                                else {
+                                                    jQuery.each(actions, function (key, value) {
                                                         var form_element = parent_tr.find("[name *='" + value.field + "']");
                                                         var target_td = form_element.closest('td');
                                                         var data_info = form_element.data('fieldname');
-                                                        if(target_td.length == 0) {
+                                                        if (target_td.length == 0) {
                                                             is_block = true;
                                                             form_element = parent_tr.closest('table').find("[name *='" + value.field + "']");
                                                             target_td = form_element.closest('td');
                                                         }
                                                         //return;
                                                         //for Multiple Value control
-                                                        if(form_element.length > 0){
+                                                        if (form_element.length > 0) {
                                                             var data_info = form_element.data('fieldinfo');
-                                                            if(form_element.hasClass(condition_key+'-clf-mandatory')){
-                                                                $.extend($('#EditView').vtValidate().settings.rules[form_element.attr('name')], {required: false});
+                                                            if (form_element.hasClass(condition_key + '-clf-mandatory')) {
                                                                 vtUtils.hideValidationMessage(form_element);
                                                                 form_element.removeAttr('data-rule-required');
                                                                 form_element.removeAttr('aria-required');
                                                                 form_element.removeAttr('aria-invalid');
-                                                                form_element.removeClass(condition_key+'-clf-mandatory');
+                                                                form_element.removeClass(condition_key + '-clf-mandatory');
                                                             }
-                                                            else if(form_element.hasClass(condition_key+'-clf-read-only')){
+                                                            else if (form_element.hasClass(condition_key + '-clf-read-only')) {
                                                                 form_element.removeAttr('readonly');
                                                                 form_element.removeAttr('disabled');
-                                                                form_element.css('background','white');
-                                                                form_element.removeClass(condition_key+'-clf-read-only');
-                                                                if (typeof data_info != 'undefined'){
-                                                                    if(data_info.type == 'reference'){
+                                                                form_element.css('background', 'white');
+                                                                form_element.removeClass(condition_key + '-clf-read-only');
+                                                                if (typeof data_info != 'undefined') {
+                                                                    if (data_info.type == 'reference') {
                                                                         var parent_span = form_element.closest('span');
                                                                         parent_span.find('div:first').show();
-                                                                    }else if(data_info.type == 'multipicklist'){
+                                                                    } else if (data_info.type == 'multipicklist') {
                                                                         form_element.select2('enable');
                                                                     }
                                                                 }
                                                             }
-                                                            else if(form_element.hasClass(condition_key+'-clf-hide')){
-                                                                form_element.removeClass(condition_key+'-clf-hide');
+                                                            else if (form_element.hasClass(condition_key + '-clf-hide')) {
+                                                                form_element.removeClass(condition_key + '-clf-hide');
                                                                 form_element.closest('div').show();
-                                                                if(!is_block) {
+                                                                if (!is_block) {
                                                                     target_td.children().show();
                                                                 }
-                                                                else{
+                                                                else {
                                                                     form_element.show();
                                                                     target_td.children().show();
-                                                                    target_td.prev('td.fieldLabel').html( target_td.prev('td.fieldLabel').data('label'));
+                                                                    target_td.prev('td.fieldLabel').html(target_td.prev('td.fieldLabel').data('label'));
                                                                 }
                                                             }
-                                                            if(form_element.is('select')) form_element.trigger('liszt:updated');
+                                                            if (form_element.is('select')) form_element.trigger('liszt:updated');
                                                         }
                                                     });
                                                 }
@@ -231,122 +229,130 @@ Vtiger.Class("Control_Layout_Fields_Js",{
                                     });
                                 }
                             }
-                            else{
-                                var check_condition = thisInstance.checkConditionToForm(all_condition,any_condition,field_name_changed,'',role_id,new_value, 'Edit');
-                                if(check_condition){
-                                    jQuery.each(actions,function(key,value){
+                            else {
+                                var check_condition = thisInstance.checkConditionToForm(all_condition, any_condition, field_name_changed, '', role_id, new_value, formname);
+                                var main_form = formname === "QuickCreateAjax" ? jQuery('#QuickCreate') : jQuery('#EditView');
+                                if (check_condition) {
+                                    jQuery.each(actions, function (key, value) {
                                         var field_name_action = value.field;
-                                        var form_element = jQuery('#EditView').find('[name="'+field_name_action+'"]');
+                                        var form_element = main_form.find('[name="' + field_name_action + '"]');
                                         //for Multiple Value control
-                                        if(form_element.attr('type') == 'hidden'){
-                                            form_element = jQuery('#EditView').find('[name="'+field_name_action+'[]"]');
-                                            if(form_element.length === 0){
+                                        if (form_element.attr('type') == 'hidden') {
+                                            form_element = main_form.find('[name="' + field_name_action + '[]"]');
+                                            if (form_element.length === 0) {
                                                 //for reference control uitype 10
-                                                form_element = jQuery('#EditView').find('[name="'+field_name_action+'_display"]');
+                                                form_element = main_form.find('[name="' + field_name_action + '_display"]');
 
-                                                    if (form_element.length === 0) {
-                                                        //for Checkbox control
-                                                        form_element = jQuery('#EditView').find('[name="' + field_name_action + '"]').last();
-                                                    }
-                                                }
-                                            }
-                                            var data_info = form_element.data('fieldname');
-                                            var this_td = form_element.closest('td');
-                                            if (value.option == 'mandatory') {
-                                                this_td.show();
-                                                this_td.prev().show();
-                                                $.extend($('#EditView').vtValidate().settings.rules[form_element.attr('name')], {required: true});
-                                                form_element.attr('data-rule-required', 'true');
-                                                form_element.addClass(condition_key + '-clf-mandatory');
-                                                form_element.css('display', '');
-                                                var field_label = form_element.closest('td').prev();
-                                                if (!field_label.find('span').length) field_label.append('<span class="redColor">*</span>');
-                                            } else if (value.option == 'read_only') {
-                                                this_td.show();
-                                                this_td.prev().show();
-                                                form_element.attr('readonly', 'readonly');
-                                                form_element.attr('disabled', 'disabled');
-                                                form_element.css('background', 'rgb(235, 235, 228)');
-                                                form_element.addClass(condition_key + '-clf-read-only');
-                                                if (typeof data_info != 'undefined') {
-                                                    if (data_info.type == 'reference') {
-                                                        var parent_span = form_element.closest('span');
-                                                        parent_span.find('div:first').hide();
-                                                    } else if (data_info.type == 'multipicklist') {
-                                                        form_element.select2('disable');
-                                                    }
-                                                }
-                                            } else if (value.option == 'hide') {
-                                                form_element.addClass(condition_key + '-clf-hide');
-                                                this_td.hide();
-                                                this_td.prev().hide();
-                                                var this_tr = this_td.closest('tr');
-                                                thisInstance.hideTr(this_tr);
-                                            }
-                                            if (form_element.is('select')) form_element.trigger('liszt:updated');
-                                            //END
-                                        });
-                                }
-                                else{
-                                        jQuery.each(actions, function (key, value) {
-                                            var field_name_action = value.field;
-                                            var form_element = jQuery('#EditView').find('[name="' + field_name_action + '"]');
-                                            //for Multiple Value control
-                                            if (form_element.attr('type') == 'hidden') {
-                                                form_element = jQuery('#EditView').find('[name="' + field_name_action + '[]"]');
                                                 if (form_element.length === 0) {
-                                                    //for reference control uitype 10
-                                                    form_element = jQuery('#EditView').find('[name="' + field_name_action + '_display"]');
-                                                    if (form_element.length === 0) {
-                                                        //for Checkbox control
-                                                        form_element = jQuery('#EditView').find('[name="' + field_name_action + '"]').last();
-                                                    }
+                                                    //for Checkbox control
+                                                    form_element = main_form.find('[name="' + field_name_action + '"]').last();
                                                 }
                                             }
-                                            var data_info = form_element.data('fieldinfo');
-                                            if (form_element.hasClass(condition_key + '-clf-mandatory')) {
-                                                vtUtils.hideValidationMessage(form_element);
-                                                $.extend($('#EditView').vtValidate().settings.rules[form_element.attr('name')], {required: false});
-                                                var field_label = form_element.closest('td').prev();
-                                                if (field_label.length) field_label.find('span.redColor').remove();
-                                                form_element.removeAttr('data-rule-required');
-                                                form_element.removeAttr('aria-required');
-                                                form_element.removeAttr('aria-invalid');
-                                                form_element.removeClass(condition_key + '-clf-mandatory');
-                                            }
-                                            if (form_element.hasClass(condition_key + '-clf-read-only')) {
-                                                form_element.removeAttr('readonly');
-                                                form_element.removeAttr('disabled');
-                                                form_element.css('background', 'white');
-                                                form_element.removeClass(condition_key + '-clf-read-only');
-                                                if (typeof data_info != 'undefined') {
-                                                    if (data_info.type == 'reference') {
-                                                        var parent_span = form_element.closest('span');
-                                                        parent_span.find('div:first').show();
-                                                    } else if (data_info.type == 'multipicklist') {
-                                                        form_element.select2('enable');
-                                                    }
+                                        }
+                                        var data_info = form_element.data('fieldname');
+                                        var this_td = form_element.closest('td');
+                                        if (value.option == 'mandatory') {
+                                            this_td.show();
+                                            this_td.prev().show();
+                                            form_element.attr('data-rule-required', 'true');
+                                            form_element.addClass(condition_key + '-clf-mandatory');
+                                            form_element.css('display', '');
+                                            var field_label = form_element.closest('td').prev();
+                                            if (!field_label.find('span').length) field_label.append('<span class="redColor">*</span>');
+                                        } else if (value.option == 'read_only') {
+                                            this_td.show();
+                                            this_td.prev().show();
+                                            form_element.attr('readonly', 'readonly');
+                                            form_element.attr('disabled', 'disabled');
+                                            form_element.css('background', 'rgb(235, 235, 228)');
+                                            form_element.addClass(condition_key + '-clf-read-only');
+                                            if (typeof data_info != 'undefined') {
+                                                if (data_info.type == 'reference') {
+                                                    var parent_span = form_element.closest('span');
+                                                    parent_span.find('div:first').hide();
+                                                } else if (data_info.type == 'multipicklist') {
+                                                    form_element.select2('disable');
                                                 }
                                             }
-                                            if (form_element.hasClass(condition_key + '-clf-hide')) {
-                                                form_element.removeClass(condition_key + '-clf-hide');
-                                                var this_td = form_element.closest('td');
-                                                //this_td.find('div:first').show();
-                                                this_td.show();
-                                                this_td.children().show();
-                                                this_td.prev().show();
-                                                this_td.prev().children().show();
-                                                if (form_element.hasClass('chzn-select') || form_element.hasClass('select2')) form_element.hide();
-                                                // Handler for custom upload field
-                                                if (this_td.find('#frm_' + field_name_action).length > 0) {
-                                                    form_element.hide();
-                                                }
-                                                var this_tr = this_td.closest('tr');
-                                                thisInstance.hideTr(this_tr);
-                                            }
-                                            if (form_element.is('select')) form_element.trigger('liszt:updated');
-                                        });
+                                        } else if (value.option == 'hide') {
+                                            form_element.addClass(condition_key + '-clf-hide');
+                                            this_td.hide();
+                                            this_td.prev().hide();
+                                            var this_tr = this_td.closest('tr');
+                                            thisInstance.hideTr(this_tr);
+                                        }
+                                        if (form_element.is('select')) form_element.trigger('liszt:updated');
                                         //END
+                                    });
+                                }
+                                else {
+                                    jQuery.each(actions, function (key, value) {
+                                        var field_name_action = value.field;
+                                        var form_element = main_form.find('[name="' + field_name_action + '"]');
+                                        //for Multiple Value control
+                                        if (form_element.attr('type') == 'hidden') {
+                                            form_element = main_form.find('[name="' + field_name_action + '[]"]');
+                                            if (form_element.length === 0) {
+                                                //for reference control uitype 10
+                                                form_element = main_form.find('[name="' + field_name_action + '_display"]');
+                                                if (form_element.length === 0) {
+                                                    //for Checkbox control
+                                                    form_element = main_form.find('[name="' + field_name_action + '"]').last();
+                                                }
+                                            }
+                                        }
+                                        var data_info = form_element.data('fieldinfo');
+                                        if (form_element.hasClass(condition_key + '-clf-mandatory')) {
+                                            var field_label = form_element.closest('td').prev();
+                                            var field_name = form_element.attr('name');
+                                            if (field_label.length) field_label.find('span.redColor').remove();
+                                            form_element.removeAttr('data-rule-required');
+                                            form_element.removeAttr('aria-required');
+                                            form_element.removeAttr('aria-invalid');
+                                            form_element.removeClass(condition_key + '-clf-mandatory');
+                                            if(form_element.hasClass('input-error')){
+                                                form_element.removeClass('input-error');
+                                                var new_form_element = form_element.clone();
+                                                var td = form_element.closest('td.fieldValue');
+                                                form_element.remove();
+                                                new_form_element.appendTo(td);
+                                            }
+                                            vtUtils.hideValidationMessage(form_element);
+                                            // $.extend(main_form.vtValidate().settings.rules[field_name], {required: false});
+                                        }
+                                        if (form_element.hasClass(condition_key + '-clf-read-only')) {
+                                            form_element.removeAttr('readonly');
+                                            form_element.removeAttr('disabled');
+                                            form_element.css('background', 'white');
+                                            form_element.removeClass(condition_key + '-clf-read-only');
+                                            if (typeof data_info != 'undefined') {
+                                                if (data_info.type == 'reference') {
+                                                    var parent_span = form_element.closest('span');
+                                                    parent_span.find('div:first').show();
+                                                } else if (data_info.type == 'multipicklist') {
+                                                    form_element.select2('enable');
+                                                }
+                                            }
+                                        }
+                                        if (form_element.hasClass(condition_key + '-clf-hide')) {
+                                            form_element.removeClass(condition_key + '-clf-hide');
+                                            var this_td = form_element.closest('td');
+                                            //this_td.find('div:first').show();
+                                            this_td.show();
+                                            this_td.children().show();
+                                            this_td.prev().show();
+                                            this_td.prev().children().show();
+                                            if (form_element.hasClass('chzn-select') || form_element.hasClass('select2')) form_element.hide();
+                                            // Handler for custom upload field
+                                            if (this_td.find('#frm_' + field_name_action).length > 0) {
+                                                form_element.hide();
+                                            }
+                                            var this_tr = this_td.closest('tr');
+                                            thisInstance.hideTr(this_tr);
+                                        }
+                                        if (form_element.is('select')) form_element.trigger('liszt:updated');
+                                    });
+                                    //END
                                 }
                             }
                             condition_key++;
@@ -356,92 +362,91 @@ Vtiger.Class("Control_Layout_Fields_Js",{
             }
         );
     },
-    hideTr:function(this_tr){
+    hideTr: function (this_tr) {
         var count_td_hide = 1;
-        this_tr.find('td').each (function() {
-            if ( jQuery(this).css('display') == 'none' || jQuery(this).html().trim() == ''){
-                count_td_hide ++;
+        this_tr.find('td').each(function () {
+            if (jQuery(this).css('display') == 'none' || jQuery(this).html().trim() == '') {
+                count_td_hide++;
             }
         });
-        if(this_tr.find('td').length==4 && count_td_hide >=5){
+        if (this_tr.find('td').length == 4 && count_td_hide >= 5) {
             this_tr.hide();
-        }else if(this_tr.find('td').length>4 && count_td_hide >6){
+        } else if (this_tr.find('td').length > 4 && count_td_hide > 6) {
             this_tr.hide();
-        }else{
+        } else {
             this_tr.show();
         }
     },
-    getFieldOnConditions: function(all_condition,any_condition){
+    getFieldOnConditions: function (all_condition, any_condition) {
         var list_fields = new Array();
-        jQuery.each(all_condition,function(key,value) {
-            if($.inArray(value.columnname,list_fields) == -1) list_fields.push(value.columnname) ;
+        jQuery.each(all_condition, function (key, value) {
+            if ($.inArray(value.columnname, list_fields) == -1) list_fields.push(value.columnname);
         });
-        jQuery.each(any_condition,function(key,value) {
-            if($.inArray(value.columnname,list_fields) == -1) list_fields.push(value.columnname) ;
+        jQuery.each(any_condition, function (key, value) {
+            if ($.inArray(value.columnname, list_fields) == -1) list_fields.push(value.columnname);
         });
         return list_fields;
     },
-    displayByClfOnDetail:function(moduleName, requestMode, fieldChangedName, record_id, blockid, new_value){
+    displayByClfOnDetail: function (moduleName, requestMode, fieldChangedName, record_id, blockid, new_value) {
         var thisInstance = this;
         //to integrate with Custom View & Form
-        if(moduleName == "CustomFormsViews"){
+        if (moduleName == "CustomFormsViews") {
             var top_url = window.location.href.split('?');
             var array_url = thisInstance.getQueryParams(top_url[1]);
             moduleName = array_url.currentModule;
         }
         var params = {
-            module : 'ControlLayoutFields',
-            action : 'ActionAjax',
-            mode : 'checkCLFForModule',
-            current_module : moduleName,
-            record_id : jQuery('#recordId').val()
+            module: 'ControlLayoutFields',
+            action: 'ActionAjax',
+            mode: 'checkCLFForModule',
+            current_module: moduleName,
+            record_id: jQuery('#recordId').val()
         };
-        app.request.post({'data': params}).then(
-            function(err,data){
-                if(err === null) {
+        app.request.post({ 'data': params }).then(
+            function (err, data) {
+                if (err === null) {
                     if (!jQuery.isEmptyObject(data)) {
                         var record_info = data.record_info;
                         var role_id = data.role_id;
-                        if($('#hd_clf_info_' + moduleName).length == 0){
+                        if ($('#hd_clf_info_' + moduleName).length == 0) {
                             jQuery('<input>').attr({
                                 type: 'hidden',
                                 id: 'hd_clf_info_' + moduleName,
-                                value:JSON.stringify(data.clf_info)
+                                value: JSON.stringify(data.clf_info)
                             }).appendTo(jQuery('#detailView'));
                         }
-                        else{
+                        else {
                             $('#hd_clf_info_' + moduleName).val(JSON.stringify(data.clf_info));
                         }
-                        jQuery.each(data.clf_info,function(k,v) {
+                        jQuery.each(data.clf_info, function (k, v) {
                             var all_condition = v.condition.all;
                             var any_condition = v.condition.any;
                             var actions = v.actions;
                             var condition_key = k;
-                            if(blockid > 0){
+                            if (blockid > 0) {
                                 var is_block = false;
-                                var fields_on_conditions = thisInstance.getFieldOnConditions(all_condition,any_condition);
-                                if(fields_on_conditions.length > 0) {
-                                    $.each(fields_on_conditions, function (index,field_name) {
-                                        var this_field = $('.relatedblockslists' +blockid ).find("[name *='" + field_name + "']");
+                                var fields_on_conditions = thisInstance.getFieldOnConditions(all_condition, any_condition);
+                                if (fields_on_conditions.length > 0) {
+                                    $.each(fields_on_conditions, function (index, field_name) {
+                                        var this_field = $('.relatedblockslists' + blockid).find("[name *='" + field_name + "']");
                                         $.each(this_field, function (i, e) {
                                             var parent_tr = $(e).closest('tr.relatedRecords');
-                                            var record_row_id =  parent_tr.data('id');
-                                            if(typeof record_row_id == "undefined"){
+                                            var record_row_id = parent_tr.data('id');
+                                            if (typeof record_row_id == "undefined") {
                                                 //is_block = true;
                                                 record_row_id = parent_tr.closest('div.blockData').data('id');
                                             }
-                                            if(record_id > 0 && new_value != "" && record_row_id > 0){
-                                                if(record_row_id != record_id) return;
+                                            if (record_id > 0 && new_value != "" && record_row_id > 0) {
+                                                if (record_row_id != record_id) return;
                                             }
                                             if (!parent_tr.hasClass('relatedRecordsClone')) {
                                                 var value_to_check = $(e).val();
-                                                if(new_value != "") value_to_check = new_value;
-                                                var check_condition = thisInstance.checkConditionToForm(all_condition, any_condition, $(e), record_info, role_id, value_to_check, 'Edit');
+                                                if (new_value != "") value_to_check = new_value;
+                                                var check_condition = thisInstance.checkConditionToForm(all_condition, any_condition, $(e), record_info, role_id, value_to_check, 'InlineEditDetail');
                                                 if (check_condition) {
                                                     jQuery.each(actions, function (index, value) {
                                                         var this_action_field = parent_tr.find("[name *='" + value.field + "']");
                                                         var target_td = this_action_field.closest('td');
-                                                        console.log( value.field + ":" + this_action_field.attr('name') + ", len:" + this_action_field.length);
                                                         if(this_action_field.length == 0) {
                                                             is_block = true;
                                                             this_action_field = parent_tr.closest('table').find("[name *='" + value.field + "']");
@@ -471,8 +476,7 @@ Vtiger.Class("Control_Layout_Fields_Js",{
                                                         else if (value.option == 'mandatory') {
                                                             var target_element = target_td.find('[name*=' + value.field + ']');
                                                             if (target_element.length > 0) {
-                                                                $.extend($('#detailView').vtValidate().settings.rules[target_element.attr('name')], {required: true});
-                                                                target_element.attr('data-rule-required', 'true');
+                                                                target_td.find('input.fieldBasicData').attr('data-rule-required', 'true');
                                                                 if (target_element.is('select')) target_element.trigger('liszt:updated');
                                                             }
                                                         }
@@ -487,7 +491,6 @@ Vtiger.Class("Control_Layout_Fields_Js",{
                                                             this_action_field = parent_tr.closest('table').find("[name ='" + value.field + "']");
                                                             target_td = this_action_field.closest('td');
                                                         }
-                                                        var target_value = this_action_field.val();
                                                         //return;
                                                         if (value.option == 'hide') {
                                                             var saved_temp_div = target_td.find('div.tempDiv');
@@ -527,218 +530,80 @@ Vtiger.Class("Control_Layout_Fields_Js",{
                                                         else if (value.option == 'mandatory') {
                                                             var target_element = target_td.find('[name=' + value.field + ']');
                                                             if (target_element.length > 0) {
-                                                                $.extend($('#detailView').vtValidate().settings.rules[target_element.attr('name')], {required: false});
-                                                                target_element.removeAttr('data-rule-required');
+                                                                target_td.find('input.fieldBasicData').removeAttr('data-rule-required');
                                                                 if (target_element.is('select')) target_element.trigger('liszt:updated');
                                                             }
                                                         }
                                                     });
-                                                    
                                                 }
                                             }
                                         });
                                     });
                                 }
                             }
-                            else{
-                                var check_condition = thisInstance.checkConditionToForm(all_condition, any_condition, fieldChangedName,record_info,role_id,'', 'Edit');
+                            else {
+                                var check_condition = thisInstance.checkConditionToForm(all_condition, any_condition, fieldChangedName, record_info, role_id, '', 'InlineEditDetail');
                                 if (check_condition) {
                                     jQuery.each(actions, function (index, value) {
-                                        if (requestMode !== undefined && (requestMode === 'full' || requestMode === 'summary')) {
+                                        if (typeof requestMode != 'undefined' && requestMode == 'full') {
                                             var target_td = jQuery("#" + moduleName + "_detailView_fieldValue_" + value.field);
-                                            if (requestMode === 'summary') target_td = jQuery('[data-name="' + value.field + '"]').closest('td').children('div:first');
                                             var target_value = target_td.children('span:first').html();
                                             if (target_td.children('span:first').data('field-type') == 'url') {
                                                 target_value = target_td.children('span:first').children('a').html();
                                             }
                                             if (!target_value) target_value = '';
                                             if (value.option == 'hide') {
-                                                target_td.prev().html("");
-                                                target_td.html("");
-                                                var tr = target_td.closest('tr');
-                                                var table = tr.closest('table');
-                                                var empty_tr = true;
-                                                var count_item = 0;
-                                                var saved_td = [];
-                                                jQuery.each(tr.find('td'), function () {
-                                                    count_item++;
-                                                    if (jQuery(this).html().trim() != '') {
-                                                        empty_tr = false;
-                                                        saved_td[count_item] = jQuery(this).html();
-                                                    }
-
-                                                });
-                                                if (empty_tr) tr.remove();
+                                                target_td.find('span.edit, span.value').hide();
+                                                target_td.find('span.action').addClass('hide');
+                                                target_td.prev().children().hide();
 
                                             }
                                             else if (value.option == 'read_only') {
-                                                if(target_td.children('span:first').length >0) {
-                                                    target_td.html(target_value);
-                                                }
+                                                target_td.find('span.action').addClass('hide');
                                             }
                                             else if (value.option == 'mandatory') {
-                                                var target_element = target_td.find('[name='+value.field+']');
-                                                if(target_element.length > 0){
-                                                    target_element.attr('data-rule-required', 'true');
-                                                    $.extend($('#detailView').vtValidate().settings.rules[target_element.attr('name')], {required: true});
-                                                    if(target_element.is('select')) target_element.trigger('liszt:updated');
+                                                var target_element = target_td.find('[name=' + value.field + ']');
+                                                if (target_element.length > 0) {
+                                                    target_td.find('input.fieldBasicData').attr('data-rule-required', 'true');
+                                                    if (target_element.is('select')) target_element.trigger('liszt:updated');
+                                                } else {
+                                                    target_element = target_td.find('[data-name=' + value.field + ']');
+                                                    target_td.find('input.fieldBasicData').attr('data-rule-required', 'true');
+                                                    if (target_element.is('select')) target_element.trigger('liszt:updated');
                                                 }
                                             }
-                                        }
-                                        else {
+                                        } else {
                                             var target_td = jQuery("#" + moduleName + "_detailView_fieldValue_" + value.field);
-                                            if(target_td.length == 0){
+                                            if (target_td.length == 0) {
                                                 //Summary view
-                                                var target_element = jQuery('[data-name='+value.field+']');
-                                                var target_span = target_element.closest('span');
+                                                var target_element = jQuery('[data-name=' + value.field + ']');
+                                                target_td = target_element.closest('td');
                                                 if (value.option == 'hide') {
-                                                    //target_span.closest('tr').remove();
-                                                    var parent_tr = target_span.closest('tr');
-                                                    if(parent_tr.find('td').length < 4){
-                                                        target_span.closest('tr').remove();
-                                                    }
+                                                    target_td.find('span.edit, span.value').hide();
+                                                    target_td.find('span.action').addClass('hide');
+                                                    target_td.prev().children().hide();
                                                 }
                                                 else if (value.option == 'read_only') {
-                                                    target_span.next().remove();
-                                                    target_span.remove();
+                                                    target_td.find('span.action').addClass('hide');
                                                 }
                                                 else if (value.option == 'mandatory') {
-                                                    $.extend($('#detailView').vtValidate().settings.rules[target_element.attr('name')], {required: true});
                                                     target_element.attr('data-rule-required', 'true');
                                                 }
-                                            }else{
-                                                //Detail View
-                                                var target_td = jQuery("#" + moduleName + "_detailView_fieldValue_" + value.field);
-                                                var target_value = target_td.children('span:first').html();
-                                                if (target_td.children('span:first').data('field-type') == 'url') {
-                                                    target_value = target_td.children('span:first').children('a').html();
-                                                }
-                                                if (!target_value) target_value = '';
+                                            } else {
+                                                target_td = jQuery("#" + moduleName + "_detailView_fieldValue_" + value.field);
                                                 if (value.option == 'hide') {
-                                                    target_td.prev().html("");
-                                                    target_td.html("");
-                                                    var tr = target_td.closest('tr');
-                                                    var table = tr.closest('table');
-                                                    var empty_tr = true;
-                                                    var count_item = 0;
-                                                    var saved_td = [];
-                                                    jQuery.each(tr.find('td'), function () {
-                                                        count_item++;
-                                                        if (jQuery(this).html().trim() != '') {
-                                                            empty_tr = false;
-                                                            saved_td[count_item] = jQuery(this).html();
-                                                        }
-
-                                                });
-                                                if (empty_tr) tr.remove();
-                                            }
-                                            else if (value.option == 'read_only') {
-                                                if(target_td.children('span:first').length >0) {
-                                                    target_td.html(target_value);
+                                                    target_td.find('span.edit, span.value').hide();
+                                                    target_td.find('span.action').addClass('hide');
+                                                    target_td.prev().children().hide();
                                                 }
-                                            }
-                                            else if (value.option == 'mandatory') {
-                                                var target_element = $('[data-name='+value.field+']');
-                                                target_element.attr('data-rule-required', 'true');
-                                                $.extend($('#detailView').vtValidate().settings.rules[target_element.attr('name')], {required: true});
-                                                if(target_element.is('select')) target_element.trigger('liszt:updated');
-                                            }
-                                        }
-                                    }
-                                });
-                                //remove all empty block
-                                jQuery.each(jQuery('#detailView').find('.detailview-table'), function () {
-                                    var row_count = jQuery(this).find('tr').length;
-                                    if (row_count == 0) jQuery(this).hide();
-                                });
-
-                                //return false;
-                                }
-                            }
-                        });
-                    }
-                }
-            }
-        );
-    },
-    displayByClfOnDetailFieldPopOut:function(moduleName, requestMode, fieldPopOut, fieldChangedName, record_id, blockid, new_value){
-        var thisInstance = this;
-        //to integrate with Custom View & Form
-        if(moduleName == "CustomFormsViews"){
-            var top_url = window.location.href.split('?');
-            var array_url = thisInstance.getQueryParams(top_url[1]);
-            moduleName = array_url.currentModule;
-        }
-        var params = {
-            module : 'ControlLayoutFields',
-            action : 'ActionAjax',
-            mode : 'checkCLFForModule',
-            current_module : moduleName,
-            record_id : jQuery('#recordId').val()
-        };
-        app.request.post({'data': params}).then(
-            function(err,data){
-                if(err === null) {
-                    var arrFieldsName = [];
-                    if (!jQuery.isEmptyObject(data)) {
-                        var record_info = data.record_info;
-                        var role_id = data.role_id;
-                        if($('#hd_clf_info_' + moduleName).length == 0){
-                            jQuery('<input>').attr({
-                                type: 'hidden',
-                                id: 'hd_clf_info_' + moduleName,
-                                value:JSON.stringify(data.clf_info)
-                            }).appendTo(jQuery('#detailView'));
-                        }
-                        else{
-                            $('#hd_clf_info_' + moduleName).val(JSON.stringify(data.clf_info));
-                        }
-                        jQuery.each(data.clf_info,function(k,v) {
-                            var all_condition = v.condition.all;
-                            var any_condition = v.condition.any;
-                            var actions = v.actions;
-                            var condition_key = k;
-                            if(blockid > 0){
-                                var is_block = false;
-                                var fields_on_conditions = thisInstance.getFieldOnConditions(all_condition,any_condition);
-                                if(fields_on_conditions.length > 0) {
-                                    $.each(fields_on_conditions, function (index,field_name) {
-                                        var this_field = $('.relatedblockslists' +blockid ).find("[name *='" + field_name + "']");
-                                        $.each(this_field, function (i, e) {
-                                            var parent_tr = $(e).closest('tr.relatedRecords');
-                                            var record_row_id =  parent_tr.data('id');
-                                            if(typeof record_row_id == "undefined"){
-                                                //is_block = true;
-                                                record_row_id = parent_tr.closest('div.blockData').data('id');
-                                            }
-                                            if(record_id > 0 && new_value != "" && record_row_id > 0){
-                                                if(record_row_id != record_id) return;
-                                            }
-                                            if (!parent_tr.hasClass('relatedRecordsClone')) {
-                                                var value_to_check = $(e).val();
-                                                if(new_value != "") value_to_check = new_value;
-                                                var check_condition = thisInstance.checkConditionToForm(all_condition, any_condition, $(e), record_info, role_id, value_to_check, 'Detail');
-                                                if (check_condition) {
-                                                    jQuery.each(actions, function (index, value) {
-                                                        //return;
-                                                        if (value.option == 'field_pop_out' && fieldPopOut === true) {
-                                                            if (arrFieldsName.indexOf(value.field.toString()) === -1)
-                                                            arrFieldsName.push(value.field.toString());
-                                                        }
-                                                    });
+                                                else if (value.option == 'read_only') {
+                                                    target_td.find('span.action').addClass('hide');
                                                 }
-                                            }
-                                        });
-                                    });
-                                }
-                            }
-                            else{
-                                var check_condition = thisInstance.checkConditionToForm(all_condition, any_condition, fieldChangedName,record_info,role_id,'', 'Detail');
-                                if (check_condition) {
-                                    jQuery.each(actions, function (index, value) {
-                                        if (requestMode !== undefined && (requestMode === 'full' || requestMode === 'summary')) {
-                                            if (value.option == 'field_pop_out' && fieldPopOut === true) {
-                                                if (arrFieldsName.indexOf(value.field.toString()) === -1) arrFieldsName.push(value.field.toString());
+                                                else if (value.option == 'mandatory') {
+                                                    var target_element = $('[data-name=' + value.field + ']');
+                                                    target_element.attr('data-rule-required', 'true');
+                                                    if (target_element.is('select')) target_element.trigger('liszt:updated');
+                                                }
                                             }
                                         }
                                     });
@@ -749,29 +614,160 @@ Vtiger.Class("Control_Layout_Fields_Js",{
                                     });
 
                                     //return false;
+                                } else {
+                                    jQuery.each(actions, function (index, value) {
+                                        if (typeof requestMode != 'undefined' && requestMode == 'full') {
+                                            var target_td = jQuery("#" + moduleName + "_detailView_fieldValue_" + value.field);
+                                            if (value.option == 'read_only') {
+                                                target_td.find('span.action').removeClass('hide');
+                                            } else if (value.option == 'mandatory') {
+                                                target_td.find('input.fieldBasicData').removeAttr('data-rule-required');
+                                            } else if (value.option == 'hide') {
+                                                target_td.find('span.edit, span.value').show();
+                                                target_td.find('span.action').removeClass('hide');
+                                                target_td.prev().children().show();
+                                            }
+                                        } else {
+                                            //Detail View
+                                            var target_td = jQuery("#" + moduleName + "_detailView_fieldValue_" + value.field);
+                                            if (target_td.length > 0) {
+                                                if (value.option == 'read_only') {
+                                                    target_td.find('span.action').removeClass('hide');
+                                                } else if (value.option == 'mandatory') {
+                                                    target_td.find('input.fieldBasicData').removeAttr('data-rule-required');
+                                                } else if (value.option == 'hide') {
+                                                    target_td.find('span.edit, span.value').show();
+                                                    target_td.find('span.action').removeClass('hide');
+                                                    target_td.prev().children().show();
+                                                }
+                                            } else {
+                                                var target_element = jQuery('[data-name=' + value.field + ']');
+                                                target_td = target_element.closest('td');
+                                                if (value.option == 'read_only') {
+                                                    target_td.find('span.action').removeClass('hide');
+                                                } else if (value.option == 'mandatory') {
+                                                    target_td.find('input.fieldBasicData').removeAttr('data-rule-required');
+                                                } else if (value.option == 'hide') {
+                                                    target_td.find('span.edit, span.value').show();
+                                                    target_td.find('span.action').removeClass('hide');
+                                                    target_td.prev().children().show();
+                                                }
+                                            }
+                                            
+                                        }
+                                    });
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+        );
+    },
+    displayByClfOnDetailFieldPopOut: function (moduleName, fieldPopOut, fieldChangedName, record_id, blockid, new_value) {
+        var thisInstance = this;
+        //to integrate with Custom View & Form
+        if (moduleName == "CustomFormsViews") {
+            var top_url = window.location.href.split('?');
+            var array_url = thisInstance.getQueryParams(top_url[1]);
+            moduleName = array_url.currentModule;
+        }
+        var params = {
+            module: 'ControlLayoutFields',
+            action: 'ActionAjax',
+            mode: 'checkCLFForModule',
+            current_module: moduleName,
+            record_id: jQuery('#recordId').val()
+        };
+        app.request.post({ 'data': params }).then(
+            function (err, data) {
+                if (err === null) {
+                    var arrFieldsName = [];
+                    if (!jQuery.isEmptyObject(data)) {
+                        var record_info = data.record_info;
+                        var role_id = data.role_id;
+                        if ($('#hd_clf_info_' + moduleName).length == 0) {
+                            jQuery('<input>').attr({
+                                type: 'hidden',
+                                id: 'hd_clf_info_' + moduleName,
+                                value: JSON.stringify(data.clf_info)
+                            }).appendTo(jQuery('#detailView'));
+                        }
+                        else {
+                            $('#hd_clf_info_' + moduleName).val(JSON.stringify(data.clf_info));
+                        }
+                        jQuery.each(data.clf_info, function (k, v) {
+                            var all_condition = v.condition.all;
+                            var any_condition = v.condition.any;
+                            var actions = v.actions;
+                            var condition_key = k;
+                            if (blockid > 0) {
+                                var is_block = false;
+                                var fields_on_conditions = thisInstance.getFieldOnConditions(all_condition, any_condition);
+                                if (fields_on_conditions.length > 0) {
+                                    $.each(fields_on_conditions, function (index, field_name) {
+                                        var this_field = $('.relatedblockslists' + blockid).find("[name *='" + field_name + "']");
+                                        $.each(this_field, function (i, e) {
+                                            var parent_tr = $(e).closest('tr.relatedRecords');
+                                            var record_row_id = parent_tr.data('id');
+                                            if (typeof record_row_id == "undefined") {
+                                                //is_block = true;
+                                                record_row_id = parent_tr.closest('div.blockData').data('id');
+                                            }
+                                            if (record_id > 0 && new_value != "" && record_row_id > 0) {
+                                                if (record_row_id != record_id) return;
+                                            }
+                                            if (!parent_tr.hasClass('relatedRecordsClone')) {
+                                                var value_to_check = $(e).val();
+                                                if (new_value != "") value_to_check = new_value;
+                                                var check_condition = thisInstance.checkConditionToForm(all_condition, any_condition, $(e), record_info, role_id, value_to_check, 'Detail');
+                                                if (check_condition) {
+                                                    jQuery.each(actions, function (index, value) {
+                                                        if (value.option == 'field_pop_out' && fieldPopOut === true) {
+                                                            if (arrFieldsName.indexOf(value.field.toString()) === -1)
+                                                                arrFieldsName.push(value.field.toString());
+                                                        }
+                                                    });
+                                                }
+                                            }
+                                        });
+                                    });
+                                }
+                            }
+                            else {
+                                var check_condition = thisInstance.checkConditionToForm(all_condition, any_condition, fieldChangedName, record_info, role_id, '', 'Detail');
+                                if (check_condition) {
+                                    jQuery.each(actions, function (index, value) {
+                                        if (value.option == 'field_pop_out' && fieldPopOut === true) {
+                                            if (arrFieldsName.indexOf(value.field.toString()) === -1)
+                                            arrFieldsName.push(value.field.toString());
+                                        }
+                                    });
                                 }
                             }
                         });
                         if (record_id && arrFieldsName.length > 0) {
                             var params = {
-                                module : 'ControlLayoutFields',
-                                view : 'QuickEditAjax',
-                                moduleEditName : moduleName,
-                                record : record_id,
-                                arrFieldsName : arrFieldsName
+                                module: 'ControlLayoutFields',
+                                view: 'QuickEditAjax',
+                                moduleEditName: moduleName,
+                                record: record_id,
+                                arrFieldsName: arrFieldsName
                             };
-                            app.request.post({'data': params}).then(function(err, data) {
+                            app.request.post({ 'data': params }).then(function (err, data) {
                                 if (err || !data) {
 
                                 } else {
-                                    app.helper.showModal(data,{'cb' : function (data){
-                                        var quickEditForm = data.find('form[name="vteControlLayoutFieldsQuickEdit"]');
-                                        var moduleName = quickEditForm.find('[name="module"]').val();
-                                        var editViewInstance = Vtiger_Edit_Js.getInstanceByModuleName(moduleName);
-                                        editViewInstance.registerBasicEvents(quickEditForm);
-                                        quickEditForm.vtValidate(app.validationEngineOptions);
-                                        thisInstance.registerControlLayoutFieldsPostLoadEvents(quickEditForm);
-                                    }});
+                                    app.helper.showModal(data, {
+                                        'cb': function (data) {
+                                            var quickEditForm = data.find('form[name="vteControlLayoutFieldsQuickEdit"]');
+                                            var moduleName = quickEditForm.find('[name="module"]').val();
+                                            var editViewInstance = Vtiger_Edit_Js.getInstanceByModuleName(moduleName);
+                                            editViewInstance.registerBasicEvents(quickEditForm);
+                                            quickEditForm.vtValidate(app.validationEngineOptions);
+                                            thisInstance.registerControlLayoutFieldsPostLoadEvents(quickEditForm);
+                                        }
+                                    });
                                 }
                             });
                         }
@@ -780,32 +776,32 @@ Vtiger.Class("Control_Layout_Fields_Js",{
             }
         );
     },
-    checkCondition: function(form_element_value,comparator,field_value,field_name_changed,field_name){
+    checkCondition: function (form_element_value, comparator, field_value, field_name_changed, field_name) {
         var thisInstace = this;
         //#1385692 BEGIN
         var form_element_value = form_element_value.toString();
         var field_value = field_value.toString();
         //#1385692 END
-        switch(comparator) {
+        switch (comparator) {
             case 'is':
                 var arrVal = field_value.split(',');
-                if(arrVal.includes(form_element_value)){
+                if (arrVal.includes(form_element_value)) {
                     return true;
                 }
                 return false;
                 break;
             case 'is not':
                 var arrVal = field_value.split(',');
-                if(arrVal.includes(form_element_value)){
+                if (arrVal.includes(form_element_value)) {
                     return false;
                 }
                 return true;
                 break;
             case 'contains':
-                return ( form_element_value.indexOf(field_value) !== -1 );
+                return (form_element_value.indexOf(field_value) !== -1);
                 break;
             case 'does not contain':
-                return ( form_element_value.indexOf(field_value) == -1 );
+                return (form_element_value.indexOf(field_value) == -1);
                 break;
             case 'starts with':
                 return (form_element_value.startsWith(field_value));
@@ -824,7 +820,7 @@ Vtiger.Class("Control_Layout_Fields_Js",{
                 break;
             case 'has changed to':
                 var arrVal = field_value.split(',');
-                if(arrVal.includes(form_element_value)){
+                if (arrVal.includes(form_element_value)) {
                     return true;
                 }
                 return false;
@@ -873,21 +869,21 @@ Vtiger.Class("Control_Layout_Fields_Js",{
                 var date_inputed = thisInstace.newDate(form_element_value);
                 var today = thisInstace.newDate();
                 var date_check = thisInstace.newDate(today.getFullYear(), today.getMonth(), today.getDate() + num_day);
-                return (date_inputed >=date_check);
+                return (date_inputed >= date_check);
                 break;
             case 'days ago':
                 var num_day = parseInt(field_value);
                 var date_inputed = thisInstace.newDate(form_element_value);
                 var today = thisInstace.newDate();
                 var date_check = thisInstace.newDate(today.getFullYear(), today.getMonth(), today.getDate() - num_day);
-                return (date_inputed >date_check);
+                return (date_inputed > date_check);
                 break;
             case 'days later':
                 var num_day = parseInt(field_value);
                 var date_inputed = thisInstace.newDate(form_element_value);
                 var today = thisInstace.newDate();
                 var date_check = thisInstace.newDate(today.getFullYear(), today.getMonth(), today.getDate() + num_day);
-                return (date_inputed >date_check);
+                return (date_inputed > date_check);
                 break;
             case 'in less than':
                 return (thisInstace.newDate(form_element_value) <= thisInstace.newDate(field_value));
@@ -898,288 +894,531 @@ Vtiger.Class("Control_Layout_Fields_Js",{
 
         }
     },
-    newDate:function(_date){
+    newDate: function (_date) {
         var _format = "mm-dd-yyyy";
         var _delimiter = "-";
-        var formatLowerCase=_format.toLowerCase();
-        var formatItems=formatLowerCase.split(_delimiter);
-        var dateItems=_date.split(_delimiter);
-        var monthIndex=formatItems.indexOf("mm");
-        var dayIndex=formatItems.indexOf("dd");
-        var yearIndex=formatItems.indexOf("yyyy");
-        var month=parseInt(dateItems[monthIndex]);
-        month-=1;
-        return new Date(dateItems[yearIndex],month,dateItems[dayIndex]);
+        var formatLowerCase = _format.toLowerCase();
+        var formatItems = formatLowerCase.split(_delimiter);
+        var dateItems = _date.split(_delimiter);
+        var monthIndex = formatItems.indexOf("mm");
+        var dayIndex = formatItems.indexOf("dd");
+        var yearIndex = formatItems.indexOf("yyyy");
+        var month = parseInt(dateItems[monthIndex]);
+        month -= 1;
+        return new Date(dateItems[yearIndex], month, dateItems[dayIndex]);
     },
     //this function to check condition from config to dispay control on form
-    checkConditionToForm:function(all_condition,any_condition,field_name_changed,record_info,role_id,new_value,mode){
+    checkConditionToForm: function (all_condition, any_condition, field_name_changed, record_info, role_id, new_value, mode) {
         var thisInstance = this;
         var is_all = false;
         var is_any = false;
-        if(all_condition.length == 0 && any_condition.length == 0){
+        if (all_condition.length == 0 && any_condition.length == 0) {
             return true;
         }
-        if(all_condition.length == 0 && any_condition.length > 0 ) is_all = true;
-        if(all_condition.length > 0 && any_condition.length == 0 ) is_any = true;
-	    var fields_on_conditions = thisInstance.getFieldOnConditions(all_condition,any_condition);
-        jQuery.each(all_condition,function(key,value){
+        if (all_condition.length == 0 && any_condition.length > 0) is_all = true;
+        if (all_condition.length > 0 && any_condition.length == 0) is_any = true;
+        var fields_on_conditions = thisInstance.getFieldOnConditions(all_condition, any_condition);
+        jQuery.each(all_condition, function (key, value) {
             var field_name = value.columnname;
-            var field_value =  value.value;
-            var comparator =  value.comparator;
-            var main_form = jQuery('#EditView');
-            var form_element = main_form.find('[name="'+field_name+'"]');
-            if(mode === 'Edit') {
-                if(field_name_changed == 'clf_details'){
-                    main_form = jQuery('#detailView');
-                    form_element = main_form.find('[data-name="'+field_name+'"]');
-                }
-                if(typeof form_element == 'undefined' && field_name == 'total'){
+            var field_value = value.value;
+            var comparator = value.comparator;
+            if (mode === 'Edit') {
+                var main_form = jQuery('#EditView');
+                var form_element = main_form.find('[name="' + field_name + '"]');
+                if (typeof form_element == 'undefined' && field_name == 'total') {
                     form_element = jQuery('#EditView').find('[name="grandTotal"]');
                 }
-                if(!form_element.length){
-                    form_element = jQuery('[data-name="' +field_name+ '"]');
+                if (!form_element.length) {
+                    form_element = jQuery('[data-name="' + field_name + '"]');
                     form_element.val(form_element.attr('data-value'));
                 }
                 var form_element_value = form_element.val();
-                if(!form_element.length && field_name == "accountname"){
+                if (!form_element.length && field_name == "accountname") {
                     form_element_value = jQuery('[name="account_id"],[name="related_to"]').data('displayvalue');
                 }
-                if(form_element.length && form_element.hasClass('sourceField')){
+                if (form_element.length && form_element.hasClass('sourceField')) {
                     form_element_value = form_element.data('displayvalue');
                 }
-                if(field_name_changed == 'clf_details') {
-                    if(form_element.data("type") != "reference"){
-                        form_element_value = form_element.data("value");
-                    }
-                    else{
-                        var link = form_element.data("displayvalue");
-                        form_element_value = $(link).html();
-                    }
-    
-                }
-                if(typeof form_element_value == 'undefined' && field_name_changed == 'clf_details'){
-                    if(typeof thisInstance.fieldValuesCache[field_name] == 'undefined') {
-                        form_element_value = record_info[field_name];
-                        thisInstance.fieldValuesCache[field_name] = form_element_value;
-                    }else{
-                        form_element_value = thisInstance.fieldValuesCache[field_name];
-                    }
-                }
-                if( field_name_changed == 'parent_id') {
+                if (field_name_changed == 'parent_id') {
                     if (new_value != '' && typeof form_element_value == 'undefined') form_element_value = new_value;
                 }
-                if(form_element.attr('type') == 'hidden'){
+                if (form_element.attr('type') == 'hidden') {
                     form_element = form_element.next();
-                    if(!form_element.is('input')){
+                    if (!form_element.is('input')) {
                         form_element = form_element.next('select');
-                        if(form_element.val()) form_element_value = form_element.val().join(',');
+                        if (form_element.val()) form_element_value = form_element.val().join(',');
                     }
-                    else{
-                        if(form_element.attr('type') == 'checkbox'){
-                            if (form_element.is(":checked"))
-                            {
+                    else {
+                        if (form_element.attr('type') == 'checkbox') {
+                            if (form_element.is(":checked")) {
                                 form_element_value = 1;
                             }
-                            else{
+                            else {
                                 form_element_value = 0;
                             }
-    
+
                         }
                     }
                 }
-                if(field_name == "roleid"){
+                if (field_name == "roleid") {
                     form_element_value = role_id;
                 }
-                if(typeof form_element_value == "undefined"){
-                    form_element = main_form.find('[name*="'+field_name+'"]');
-                    if(form_element.length > 0) form_element_value = form_element.val();
+                if (typeof form_element_value == "undefined") {
+                    form_element = main_form.find('[name*="' + field_name + '"]');
+                    if (form_element.length > 0) form_element_value = form_element.val();
                 }
-                if(form_element.length >= 2) {
+                if (form_element.length >= 2) {
                     $.each(form_element, function (i, e) {
                         var parent_tr = $(e).closest('tr');
-                        if (parent_tr.hasClass('relatedRecords')){
+                        if (parent_tr.hasClass('relatedRecords')) {
                             form_element_value = $(e).val();
                             return;
                         }
                     });
                 }
-                if(form_element_value !== undefined){
-                    var result = thisInstance.checkCondition(form_element_value,comparator,field_value,field_name_changed,field_name);
-                    if(result == true){
+                if (form_element_value !== undefined) {
+                    var result = thisInstance.checkCondition(form_element_value, comparator, field_value, field_name_changed, field_name);
+                    if (result == true) {
                         is_all = result;
-                    }else{
+                    } else {
                         is_all = false;
                         return false;
                     }
                 }
-            } else if(mode === 'Detail') {
+            } else if (mode === 'Detail') {
+                var main_form = jQuery('#detailView');
+                var form_element = main_form.find('[name="' + field_name + '"]');
                 if (field_name_changed === field_name) {
-                    if(field_name_changed == 'clf_details'){
-                        main_form = jQuery('#detailView');
-                        form_element = main_form.find('[data-name="'+field_name+'"]');
-                    }
-                    if(typeof form_element == 'undefined' && field_name == 'total'){
-                        form_element = jQuery('#detailView').find('[name="grandTotal"]');
-                    }
-                    if(!form_element.length){
-                        form_element = jQuery('[data-name="' +field_name+ '"]');
+                    if (!form_element.length) {
+                        form_element = jQuery('[data-name="' + field_name + '"]');
                         form_element.val(form_element.attr('data-value'));
                     }
                     var form_element_value = form_element.val();
-                    if(!form_element.length && field_name == "accountname"){
+                    if (!form_element.length && field_name == "accountname") {
                         form_element_value = jQuery('[name="account_id"],[name="related_to"]').data('displayvalue');
                     }
-                    if(form_element.length && form_element.hasClass('sourceField')){
+                    if (form_element.length && form_element.hasClass('sourceField')) {
                         form_element_value = form_element.data('displayvalue');
                     }
-                    if(field_name_changed == 'clf_details') {
-                        if(form_element.data("type") != "reference"){
-                            form_element_value = form_element.data("value");
-                        }
-                        else{
-                            var link = form_element.data("displayvalue");
-                            form_element_value = $(link).html();
-                        }
-        
-                    }
-                    if(typeof form_element_value == 'undefined' && field_name_changed == 'clf_details'){
-                        if(typeof thisInstance.fieldValuesCache[field_name] == 'undefined') {
+                    if (typeof form_element_value == 'undefined') {
+                        if (typeof thisInstance.fieldValuesCache[field_name] == 'undefined') {
                             form_element_value = record_info[field_name];
                             thisInstance.fieldValuesCache[field_name] = form_element_value;
-                        }else{
+                        } else {
                             form_element_value = thisInstance.fieldValuesCache[field_name];
                         }
                     }
-                    if( field_name_changed == 'parent_id') {
+                    if (field_name_changed == 'parent_id') {
                         if (new_value != '' && typeof form_element_value == 'undefined') form_element_value = new_value;
                     }
-                    if(form_element.attr('type') == 'hidden'){
+                    if (form_element.attr('type') == 'hidden') {
                         form_element = form_element.next();
-                        if(!form_element.is('input')){
+                        if (!form_element.is('input')) {
                             form_element = form_element.next('select');
-                            if(form_element.val()) form_element_value = form_element.val().join(',');
+                            if (form_element.val()) form_element_value = form_element.val().join(',');
                         }
-                        else{
-                            if(form_element.attr('type') == 'checkbox'){
-                                if (form_element.is(":checked"))
-                                {
+                        else {
+                            if (form_element.attr('type') == 'checkbox') {
+                                if (form_element.is(":checked")) {
                                     form_element_value = 1;
                                 }
-                                else{
+                                else {
                                     form_element_value = 0;
                                 }
-        
+
                             }
                         }
                     }
-                    if(field_name == "roleid"){
+                    if (field_name == "roleid") {
                         form_element_value = role_id;
                     }
-                    if(typeof form_element_value == "undefined"){
-                        form_element = main_form.find('[name*="'+field_name+'"]');
-                        if(form_element.length > 0) form_element_value = form_element.val();
+                    if (typeof form_element_value == "undefined") {
+                        form_element = main_form.find('[name*="' + field_name + '"]');
+                        if (form_element.length > 0) form_element_value = form_element.val();
                     }
-                    if(form_element.length >= 2) {
+                    if (form_element.length >= 2) {
                         $.each(form_element, function (i, e) {
                             var parent_tr = $(e).closest('tr');
-                            if (parent_tr.hasClass('relatedRecords')){
+                            if (parent_tr.hasClass('relatedRecords')) {
                                 form_element_value = $(e).val();
                                 return;
                             }
                         });
                     }
-                    if(form_element_value !== undefined){
-                        var result = thisInstance.checkCondition(form_element_value,comparator,field_value,field_name_changed,field_name);
-                        if(result == true){
+                    if (form_element_value !== undefined) {
+                        var result = thisInstance.checkCondition(form_element_value, comparator, field_value, field_name_changed, field_name);
+                        if (result == true) {
                             is_all = result;
-                        }else{
+                        } else {
                             is_all = false;
                             return false;
                         }
                     }
                 }
-            }
-        });
-        jQuery.each(any_condition,function(key,value){
-            var field_name = value.columnname;
-            var field_value =  value.value;
-            var comparator =  value.comparator;
-            var form_element = jQuery('#EditView').find('[name="'+field_name+'"]');
-            if (field_name_changed === field_name) {
-                if(field_name_changed == 'clf_details'){
-                    form_element = jQuery('#detailView').find('[name="'+field_name+'"]');
-                }
-                if(typeof form_element == 'undefined' && field_name == 'total'){
-                    form_element = jQuery('#detailView').find('[name="grandTotal"]');
-                }
-                if(!form_element.length){
-                    form_element = jQuery('[data-name="' +field_name+ '"]');
+            } else if (mode === "InlineEditDetail") {
+                var main_form = jQuery('#detailView');
+                var form_element = main_form.find('[name="' + field_name + '"]');
+                if (!form_element.length) {
+                    form_element = jQuery('[data-name="' + field_name + '"]');
                     form_element.val(form_element.attr('data-value'));
                 }
                 var form_element_value = form_element.val();
-                if(typeof form_element_value == 'undefined' && field_name_changed == 'clf_details'){
+                if (!form_element.length && field_name == "accountname") {
+                    form_element_value = jQuery('[name="account_id"],[name="related_to"]').data('displayvalue');
+                }
+                if (form_element.length && form_element.hasClass('sourceField')) {
+                    form_element_value = form_element.data('displayvalue');
+                }
+                if (typeof form_element_value == 'undefined') {
+                    if (typeof thisInstance.fieldValuesCache[field_name] == 'undefined') {
+                        form_element_value = record_info[field_name];
+                        thisInstance.fieldValuesCache[field_name] = form_element_value;
+                    } else {
+                        form_element_value = thisInstance.fieldValuesCache[field_name];
+                    }
+                }
+                if (field_name_changed == 'parent_id') {
+                    if (new_value != '' && typeof form_element_value == 'undefined') form_element_value = new_value;
+                }
+                if (form_element.attr('type') == 'hidden') {
+                    form_element = form_element.next();
+                    if (!form_element.is('input')) {
+                        form_element = form_element.next('select');
+                        if (form_element.val()) form_element_value = form_element.val().join(',');
+                    }
+                    else {
+                        if (form_element.attr('type') == 'checkbox') {
+                            if (form_element.is(":checked")) {
+                                form_element_value = 1;
+                            }
+                            else {
+                                form_element_value = 0;
+                            }
+
+                        }
+                    }
+                }
+                if (field_name == "roleid") {
+                    form_element_value = role_id;
+                }
+                if (typeof form_element_value == "undefined") {
+                    form_element = main_form.find('[name*="' + field_name + '"]');
+                    if (form_element.length > 0) form_element_value = form_element.val();
+                }
+                if (form_element.length >= 2) {
+                    $.each(form_element, function (i, e) {
+                        var parent_tr = $(e).closest('tr');
+                        if (parent_tr.hasClass('relatedRecords')) {
+                            form_element_value = $(e).val();
+                            return;
+                        }
+                    });
+                }
+                if (form_element_value !== undefined) {
+                    var result = thisInstance.checkCondition(form_element_value, comparator, field_value, field_name_changed, field_name);
+                    if (result == true) {
+                        is_all = result;
+                    } else {
+                        is_all = false;
+                        return false;
+                    }
+                }
+            } else if (mode === 'QuickCreateAjax') {
+                var main_form = jQuery('#QuickCreate');
+                var form_element = main_form.find('[name="' + field_name + '"]');
+                if (!form_element.length) {
+                    form_element = jQuery('[data-name="' + field_name + '"]');
+                    form_element.val(form_element.attr('data-value'));
+                }
+                var form_element_value = form_element.val();
+                if (!form_element.length && field_name == "accountname") {
+                    form_element_value = jQuery('[name="account_id"],[name="related_to"]').data('displayvalue');
+                }
+                if (form_element.length && form_element.hasClass('sourceField')) {
+                    form_element_value = form_element.data('displayvalue');
+                }
+                if (field_name_changed == 'parent_id') {
+                    if (new_value != '' && typeof form_element_value == 'undefined') form_element_value = new_value;
+                }
+                if (form_element.attr('type') == 'hidden') {
+                    form_element = form_element.next();
+                    if (!form_element.is('input')) {
+                        form_element = form_element.next('select');
+                        if (form_element.val()) form_element_value = form_element.val().join(',');
+                    }
+                    else {
+                        if (form_element.attr('type') == 'checkbox') {
+                            if (form_element.is(":checked")) {
+                                form_element_value = 1;
+                            }
+                            else {
+                                form_element_value = 0;
+                            }
+
+                        }
+                    }
+                }
+                if (field_name == "roleid") {
+                    form_element_value = role_id;
+                }
+                if (typeof form_element_value == "undefined") {
+                    form_element = main_form.find('[name*="' + field_name + '"]');
+                    if (form_element.length > 0) form_element_value = form_element.val();
+                }
+                if (form_element.length >= 2) {
+                    $.each(form_element, function (i, e) {
+                        var parent_tr = $(e).closest('tr');
+                        if (parent_tr.hasClass('relatedRecords')) {
+                            form_element_value = $(e).val();
+                            return;
+                        }
+                    });
+                }
+                if (form_element_value !== undefined) {
+                    var result = thisInstance.checkCondition(form_element_value, comparator, field_value, field_name_changed, field_name);
+                    if (result == true) {
+                        is_all = result;
+                    } else {
+                        is_all = false;
+                        return false;
+                    }
+                }
+            }
+        });
+        jQuery.each(any_condition, function (key, value) {
+            var field_name = value.columnname;
+            var field_value = value.value;
+            var comparator = value.comparator;
+            if (mode === 'Edit') {
+                var form_element = jQuery('#EditView').find('[name="' + field_name + '"]');
+                if (!form_element.length) {
+                    form_element = jQuery('[data-name="' + field_name + '"]');
+                    form_element.val(form_element.attr('data-value'));
+                }
+                var form_element_value = form_element.val();
+                if (typeof form_element_value == 'undefined') {
                     var record_info = thisInstance.getRecordIdAndModule();
-                    if(typeof thisInstance.fieldValuesCache[field_name] == 'undefined') {
-                        jQuery.each(record_info,function(key,value){
-                            if(key == field_name) form_element_value = value;
+                    if (typeof thisInstance.fieldValuesCache[field_name] == 'undefined') {
+                        jQuery.each(record_info, function (key, value) {
+                            if (key == field_name) form_element_value = value;
                         });
                         thisInstance.fieldValuesCache[field_name] = form_element_value;
-                    }else{
+                    } else {
                         form_element_value = thisInstance.fieldValuesCache[field_name];
                     }
                 }
                 //for Multiple Value control
-                if(form_element.attr('type') == 'hidden'){
+                if (form_element.attr('type') == 'hidden') {
                     form_element = form_element.next();
-                    if(!form_element.is('input')){
+                    if (!form_element.is('input')) {
                         form_element = form_element.next('select');
-                        if(form_element.val()) form_element_value = form_element.val().join(',');
+                        if (form_element.val()) form_element_value = form_element.val().join(',');
                     }
-                    else{
-                        if(form_element.attr('type') == 'checkbox'){
-                            if (form_element.is(":checked"))
-                            {
+                    else {
+                        if (form_element.attr('type') == 'checkbox') {
+                            if (form_element.is(":checked")) {
                                 form_element_value = 1;
                             }
-                            else{
+                            else {
                                 form_element_value = 0;
                             }
-    
+
                         }
                     }
                 }
-                if(typeof form_element_value == "undefined") return false;
-                var result = thisInstance.checkCondition(form_element_value,comparator,field_value,field_name_changed,field_name);
-                if(result){
+                if (typeof form_element_value == "undefined") return false;
+                var result = thisInstance.checkCondition(form_element_value, comparator, field_value, field_name_changed, field_name);
+                if (result) {
                     is_any = true;
+                }
+            } else if (mode === 'Detail') {
+                if (field_name_changed === field_name) {
+                    var form_element = jQuery('#detailView').find('[name="' + field_name + '"]');
+                    if (!form_element.length) {
+                        form_element = jQuery('[data-name="' + field_name + '"]');
+                        form_element.val(form_element.attr('data-value'));
+                    }
+                    var form_element_value = form_element.val();
+                    if (typeof form_element_value == 'undefined') {
+                        var record_info = thisInstance.getRecordIdAndModule();
+                        if (typeof thisInstance.fieldValuesCache[field_name] == 'undefined') {
+                            jQuery.each(record_info, function (key, value) {
+                                if (key == field_name) form_element_value = value;
+                            });
+                            thisInstance.fieldValuesCache[field_name] = form_element_value;
+                        } else {
+                            form_element_value = thisInstance.fieldValuesCache[field_name];
+                        }
+                    }
+                    //for Multiple Value control
+                    if (form_element.attr('type') == 'hidden') {
+                        form_element = form_element.next();
+                        if (!form_element.is('input')) {
+                            form_element = form_element.next('select');
+                            if (form_element.val()) form_element_value = form_element.val().join(',');
+                        }
+                        else {
+                            if (form_element.attr('type') == 'checkbox') {
+                                if (form_element.is(":checked")) {
+                                    form_element_value = 1;
+                                }
+                                else {
+                                    form_element_value = 0;
+                                }
+
+                            }
+                        }
+                    }
+                    if (typeof form_element_value == "undefined") return false;
+                    var result = thisInstance.checkCondition(form_element_value, comparator, field_value, field_name_changed, field_name);
+                    if (result) {
+                        is_any = true;
+                    }
+                }
+            } else if (mode === 'InlineEditDetail') {
+                var form_element = jQuery('#detailView').find('[name="' + field_name + '"]');
+                if (!form_element.length) {
+                    form_element = jQuery('[data-name="' + field_name + '"]');
+                    form_element.val(form_element.attr('data-value'));
+                }
+                var form_element_value = form_element.val();
+                if (typeof form_element_value == 'undefined') {
+                    var record_info = thisInstance.getRecordIdAndModule();
+                    if (typeof thisInstance.fieldValuesCache[field_name] == 'undefined') {
+                        jQuery.each(record_info, function (key, value) {
+                            if (key == field_name) form_element_value = value;
+                        });
+                        thisInstance.fieldValuesCache[field_name] = form_element_value;
+                    } else {
+                        form_element_value = thisInstance.fieldValuesCache[field_name];
+                    }
+                }
+                //for Multiple Value control
+                if (form_element.attr('type') == 'hidden') {
+                    form_element = form_element.next();
+                    if (!form_element.is('input')) {
+                        form_element = form_element.next('select');
+                        if (form_element.val()) form_element_value = form_element.val().join(',');
+                    }
+                    else {
+                        if (form_element.attr('type') == 'checkbox') {
+                            if (form_element.is(":checked")) {
+                                form_element_value = 1;
+                            }
+                            else {
+                                form_element_value = 0;
+                            }
+
+                        }
+                    }
+                }
+                if (typeof form_element_value == "undefined") return false;
+                var result = thisInstance.checkCondition(form_element_value, comparator, field_value, field_name_changed, field_name);
+                if (result) {
+                    is_any = true;
+                }
+            } else if (mode === 'QuickCreateAjax') {
+                var main_form = jQuery('#QuickCreate');
+                var form_element = main_form.find('[name="' + field_name + '"]');
+                if (!form_element.length) {
+                    form_element = jQuery('[data-name="' + field_name + '"]');
+                    form_element.val(form_element.attr('data-value'));
+                }
+                var form_element_value = form_element.val();
+                if (!form_element.length && field_name == "accountname") {
+                    form_element_value = jQuery('[name="account_id"],[name="related_to"]').data('displayvalue');
+                }
+                if (form_element.length && form_element.hasClass('sourceField')) {
+                    form_element_value = form_element.data('displayvalue');
+                }
+                if (field_name_changed == 'parent_id') {
+                    if (new_value != '' && typeof form_element_value == 'undefined') form_element_value = new_value;
+                }
+                if (form_element.attr('type') == 'hidden') {
+                    form_element = form_element.next();
+                    if (!form_element.is('input')) {
+                        form_element = form_element.next('select');
+                        if (form_element.val()) form_element_value = form_element.val().join(',');
+                    }
+                    else {
+                        if (form_element.attr('type') == 'checkbox') {
+                            if (form_element.is(":checked")) {
+                                form_element_value = 1;
+                            }
+                            else {
+                                form_element_value = 0;
+                            }
+
+                        }
+                    }
+                }
+                if (field_name == "roleid") {
+                    form_element_value = role_id;
+                }
+                if (typeof form_element_value == "undefined") {
+                    form_element = main_form.find('[name*="' + field_name + '"]');
+                    if (form_element.length > 0) form_element_value = form_element.val();
+                }
+                if (form_element.length >= 2) {
+                    $.each(form_element, function (i, e) {
+                        var parent_tr = $(e).closest('tr');
+                        if (parent_tr.hasClass('relatedRecords')) {
+                            form_element_value = $(e).val();
+                            return;
+                        }
+                    });
+                }
+                if (form_element_value !== undefined) {
+                    var result = thisInstance.checkCondition(form_element_value, comparator, field_value, field_name_changed, field_name);
+                    if (result == true) {
+                        is_all = result;
+                    } else {
+                        is_all = false;
+                        return false;
+                    }
                 }
             }
         });
         return is_all && is_any;
 
     },
-    registerFormChange:function(module){
+    registerFormChange: function (formname, module) {
         var thisInstance = this;
-        jQuery("#EditView,.relatedblockslists_records").on("change", "input,select,textarea", function () {
-            var field_name = jQuery(this).attr('name');
-            //TASKID:13034 - DEV: tiennguyen - DATE: 2018-10-16 - START
-            //NOTE missing value for function
-            var new_value = jQuery(this).val();
-            //TASKID:13034 - DEV: tiennguyen - DATE: 2018-10-16 - START
-            var this_val = jQuery(this).val();
-            if (field_name) {
-                var relatedRecords = jQuery(this).closest('.relatedRecords');
-                if (relatedRecords.length > 0) {
-                    var blockid = relatedRecords.closest('div.relatedblockslists_records').data('block-id');
-                    thisInstance.displayByClf(module, field_name, this_val, blockid);
+        if(formname == "Edit") {
+            jQuery("#EditView,.relatedblockslists_records").on("change", "input,select,textarea", function () {
+                var field_name = jQuery(this).attr('name');
+                var new_value = jQuery(this).val();
+                var this_val = jQuery(this).val();
+                if (field_name) {
+                    var relatedRecords = jQuery(this).closest('.relatedRecords');
+                    if (relatedRecords.length > 0) {
+                        var blockid = relatedRecords.closest('div.relatedblockslists_records').data('block-id');
+                        thisInstance.displayByClf("Edit", module, field_name, this_val, blockid);
+                    }
+                    else thisInstance.displayByClf("Edit", module, field_name);
+                } else {
+                    thisInstance.displayByClf("Edit", module, field_name, new_value);
                 }
-                else thisInstance.displayByClf(module, field_name);
-            } else {
-                thisInstance.displayByClf(module, field_name, new_value);
-            }
-        });
+            });
+        } else if (formname === "QuickCreateAjax") {
+            jQuery("#QuickCreate,.relatedblockslists_records").on("change", "input,select,textarea", function () {
+                var field_name = jQuery(this).attr('name');
+                var new_value = jQuery(this).val();
+                var this_val = jQuery(this).val();
+                if (field_name) {
+                    var relatedRecords = jQuery(this).closest('.relatedRecords');
+                    if (relatedRecords.length > 0) {
+                        var blockid = relatedRecords.closest('div.relatedblockslists_records').data('block-id');
+                        thisInstance.displayByClf("QuickCreateAjax", module, field_name, this_val, blockid);
+                    }
+                    else thisInstance.displayByClf("QuickCreateAjax", module, field_name);
+                } else {
+                    thisInstance.displayByClf("QuickCreateAjax", module, field_name, new_value);
+                }
+            });
+        }
     },
-    getRecordIdAndModule: function(){
+    getRecordIdAndModule: function () {
         var return_arr = [];
         var url = window.location.href.split('?');
         var array_url = this.getQueryParams(url[1]);
@@ -1187,8 +1426,8 @@ Vtiger.Class("Control_Layout_Fields_Js",{
         return_arr.push(array_url.record);
         return return_arr;
     },
-    getQueryParams:function(qs) {
-        if(typeof(qs) != 'undefined' ){
+    getQueryParams: function (qs) {
+        if (typeof (qs) != 'undefined') {
             qs = qs.toString().split('+').join(' ');
             var params = {},
                 tokens,
@@ -1203,9 +1442,9 @@ Vtiger.Class("Control_Layout_Fields_Js",{
     /*
      * Function to register the list view row click event
      */
-    registerRowClickEvent: function(){
+    registerRowClickEvent: function () {
         var listViewContentDiv = jQuery('.listViewEntriesTable');
-        listViewContentDiv.on('click','.listViewEntryValue',function(e){
+        listViewContentDiv.on('click', '.listViewEntryValue', function (e) {
             var editUrl = jQuery(this).closest('tr').data('recordurl');
             window.location.href = editUrl;
         });
@@ -1213,47 +1452,55 @@ Vtiger.Class("Control_Layout_Fields_Js",{
     /*
      * Function to register inlineAjaxSave click event
      */
-    registerInlineAjaxSaveClickEvent: function(){
+    registerInlineAjaxSaveClickEvent: function () {
         var listViewContentDiv = jQuery('.fieldValue ');
-        listViewContentDiv.on('click','.inlineAjaxSave',function(e){
-            var rule_required_field = jQuery(this).closest('td').find('input.fieldBasicData').data('rule-required');
+        listViewContentDiv.on('click', '.inlineAjaxSave', function (e) {
+            var rule_required_field = jQuery(this).closest('td').find('input.fieldBasicData').attr('data-rule-required');
             var field_id = jQuery(this).closest('td').find('input.fieldBasicData').data('name');
-            var this_field = jQuery(this).closest('td').find('[name="'+field_id+'"]');
-            if(rule_required_field){
-                if(this_field.val()==''){
-                    this_field.attr('aria-required','true');
-                    this_field.attr('aria-invalid','true');
+            var this_field = jQuery(this).closest('td').find('[name="' + field_id + '"]');
+            if (rule_required_field) {
+                if (this_field.val() == '') {
+                    this_field.attr('aria-required', 'true');
+                    this_field.attr('aria-invalid', 'true');
                     this_field.addClass('input-error');
                     var msg = app.vtranslate('JS_REQUIRED_FIELD');
                     var params = {};
                     params.position = {
                         my: 'bottom left',
                         at: 'top left',
-                        container:jQuery("#detailView")
+                        container: jQuery("#detailView")
                     };
-                    vtUtils.showValidationMessage(this_field,msg,params);
+                    vtUtils.showValidationMessage(this_field, msg, params);
                     return false;
                 }
-                else{
+                else {
                     vtUtils.hideValidationMessage(this_field);
                     return true;
                 }
             }
-            else{
+            else {
+                vtUtils.hideValidationMessage(this_field);
                 return true;
             }
         });
+
+        listViewContentDiv.on('click', '.inlineAjaxCancel', function (e) {
+            var field_id = jQuery(this).closest('td').find('input.fieldBasicData').data('name');
+            var this_field = jQuery(this).closest('td').find('[name="' + field_id + '"]');
+            vtUtils.hideValidationMessage(this_field);
+            return true;
+        });
     },
-    waitUntil : function (waitFor,toDo){
-        if(waitFor()) {
+    waitUntil: function (waitFor, toDo) {
+        if (waitFor()) {
             toDo();
         } else {
-            setTimeout(function() {
+            setTimeout(function () {
                 waitUntil(waitFor, toDo);
             }, 300);
         }
     },
-    registerEvents : function(){
+    registerEvents: function () {
         this.registerModuleFilterChange();
         this.registerPagingAction();
         this.registerDeleteAction();
@@ -1262,308 +1509,306 @@ Vtiger.Class("Control_Layout_Fields_Js",{
     //1205661 BEGIN
     // make ConditionLayout work witd VTEButton popup
     //pham@vtexperts.com
-    checkConditionToButtonPopupForm:function(all_condition,any_condition,field_name_changed,record_info,role_id,new_value){
+    checkConditionToButtonPopupForm: function (all_condition, any_condition, field_name_changed, record_info, role_id, new_value) {
         var thisInstance = this;
         var is_all = false;
         var is_any = false;
-        if(all_condition.length == 0 && any_condition.length == 0){
+        if (all_condition.length == 0 && any_condition.length == 0) {
             return true;
         }
-        if(all_condition.length == 0 && any_condition.length > 0 ) is_all = true;
-        if(all_condition.length > 0 && any_condition.length == 0 ) is_any = true;
-        var fields_on_conditions = thisInstance.getFieldOnConditions(all_condition,any_condition);
-        jQuery.each(all_condition,function(key,value){
+        if (all_condition.length == 0 && any_condition.length > 0) is_all = true;
+        if (all_condition.length > 0 && any_condition.length == 0) is_any = true;
+        var fields_on_conditions = thisInstance.getFieldOnConditions(all_condition, any_condition);
+        jQuery.each(all_condition, function (key, value) {
             var field_name = value.columnname;
-            var field_value =  value.value;
-            var comparator =  value.comparator;
+            var field_value = value.value;
+            var comparator = value.comparator;
             var main_form = jQuery('#vteButtonQuickEdit');
-            var form_element = main_form.find('[name="'+field_name+'"]');
-            if(field_name_changed == 'clf_details'){
+            var form_element = main_form.find('[name="' + field_name + '"]');
+            if (field_name_changed == 'clf_details') {
                 main_form = jQuery('#detailView');
-                form_element = main_form.find('[data-name="'+field_name+'"]');
+                form_element = main_form.find('[data-name="' + field_name + '"]');
             }
-            if(typeof form_element == 'undefined' && field_name == 'total'){
+            if (typeof form_element == 'undefined' && field_name == 'total') {
                 form_element = jQuery('#vteButtonQuickEdit').find('[name="grandTotal"]');
             }
-            if(!form_element.length){
-                form_element = jQuery('[data-name="' +field_name+ '"]');
+            if (!form_element.length) {
+                form_element = jQuery('[data-name="' + field_name + '"]');
                 form_element.val(form_element.attr('data-value'));
             }
             var form_element_value = form_element.val();
-            if(!form_element.length && field_name == "accountname"){
+            if (!form_element.length && field_name == "accountname") {
                 form_element_value = jQuery('[name="account_id"],[name="related_to"]').data('displayvalue');
             }
-            if(form_element.length && form_element.hasClass('sourceField')){
+            if (form_element.length && form_element.hasClass('sourceField')) {
                 form_element_value = form_element.data('displayvalue');
             }
-            if(field_name_changed == 'clf_details') {
-                if(form_element.data("type") != "reference"){
+            if (field_name_changed == 'clf_details') {
+                if (form_element.data("type") != "reference") {
                     form_element_value = form_element.data("value");
                 }
-                else{
+                else {
                     var link = form_element.data("displayvalue");
                     form_element_value = $(link).html();
                 }
 
             }
-            if(typeof form_element_value == 'undefined' && field_name_changed == 'clf_details'){
-                if(typeof thisInstance.fieldValuesCache[field_name] == 'undefined') {
+            if (typeof form_element_value == 'undefined' && field_name_changed == 'clf_details') {
+                if (typeof thisInstance.fieldValuesCache[field_name] == 'undefined') {
                     form_element_value = record_info[field_name];
                     thisInstance.fieldValuesCache[field_name] = form_element_value;
-                }else{
+                } else {
                     form_element_value = thisInstance.fieldValuesCache[field_name];
                 }
             }
-            if(new_value != '' && typeof form_element_value == 'undefined') form_element_value = new_value;
-            if(form_element.attr('type') == 'hidden'){
+            if (new_value != '' && typeof form_element_value == 'undefined') form_element_value = new_value;
+            if (form_element.attr('type') == 'hidden') {
                 form_element = form_element.next();
-                if(!form_element.is('input')){
+                if (!form_element.is('input')) {
                     form_element = form_element.next('select');
-                    if(form_element.val()) form_element_value = form_element.val().join(',');
+                    if (form_element.val()) form_element_value = form_element.val().join(',');
                 }
-                else{
-                    if(form_element.attr('type') == 'checkbox'){
-                        if (form_element.is(":checked"))
-                        {
+                else {
+                    if (form_element.attr('type') == 'checkbox') {
+                        if (form_element.is(":checked")) {
                             form_element_value = 1;
                         }
-                        else{
+                        else {
                             form_element_value = 0;
                         }
 
                     }
                 }
             }
-            if(field_name == "roleid"){
+            if (field_name == "roleid") {
                 form_element_value = role_id;
             }
-            if(typeof form_element_value == "undefined"){
-                form_element = main_form.find('[name*="'+field_name+'"]');
-                if(form_element.length > 0) form_element_value = form_element.val();
+            if (typeof form_element_value == "undefined") {
+                form_element = main_form.find('[name*="' + field_name + '"]');
+                if (form_element.length > 0) form_element_value = form_element.val();
             }
-            if(form_element.length >= 2) {
+            if (form_element.length >= 2) {
                 $.each(form_element, function (i, e) {
                     var parent_tr = $(e).closest('tr');
-                    if (parent_tr.hasClass('relatedRecords')){
+                    if (parent_tr.hasClass('relatedRecords')) {
                         form_element_value = $(e).val();
                         return;
                     }
                 });
             }
-            if(record_info != undefined && record_info[field_name] != undefined && record_info[field_name] != '' ){
+            if (record_info != undefined && record_info[field_name] != undefined && record_info[field_name] != '') {
                 form_element_value = record_info[field_name];
             }
-            if( typeof form_element_value != "undefined"){
-                var result = thisInstance.checkCondition(form_element_value,comparator,field_value,field_name_changed,field_name);
-                if(result == true){
+            if (typeof form_element_value != "undefined") {
+                var result = thisInstance.checkCondition(form_element_value, comparator, field_value, field_name_changed, field_name);
+                if (result == true) {
                     is_all = result;
-                }else{
+                } else {
                     is_all = false;
                 }
             }
         });
-        jQuery.each(any_condition,function(key,value){
+        jQuery.each(any_condition, function (key, value) {
             var field_name = value.columnname;
-            var field_value =  value.value;
-            var comparator =  value.comparator;
-            var form_element = jQuery('#vteButtonQuickEdit').find('[name="'+field_name+'"]');
-            if(field_name_changed == 'clf_details'){
-                form_element = jQuery('#detailView').find('[name="'+field_name+'"]');
+            var field_value = value.value;
+            var comparator = value.comparator;
+            var form_element = jQuery('#vteButtonQuickEdit').find('[name="' + field_name + '"]');
+            if (field_name_changed == 'clf_details') {
+                form_element = jQuery('#detailView').find('[name="' + field_name + '"]');
             }
-            if(typeof form_element == 'undefined' && field_name == 'total'){
+            if (typeof form_element == 'undefined' && field_name == 'total') {
                 form_element = jQuery('#detailView').find('[name="grandTotal"]');
             }
-            if(!form_element.length){
-                form_element = jQuery('[data-name="' +field_name+ '"]');
+            if (!form_element.length) {
+                form_element = jQuery('[data-name="' + field_name + '"]');
                 form_element.val(form_element.attr('data-value'));
             }
-            if(!form_element.length){
+            if (!form_element.length) {
                 //return; //687370 - need to get value from record_info
             }
             var form_element_value = form_element.val();
-            if(typeof form_element_value == 'undefined' && field_name_changed == 'clf_details'){
+            if (typeof form_element_value == 'undefined' && field_name_changed == 'clf_details') {
                 var record_info = thisInstance.getRecordIdAndModule();
-                if(typeof thisInstance.fieldValuesCache[field_name] == 'undefined') {
-                    jQuery.each(record_info,function(key,value){
-                        if(key == field_name) form_element_value = value;
+                if (typeof thisInstance.fieldValuesCache[field_name] == 'undefined') {
+                    jQuery.each(record_info, function (key, value) {
+                        if (key == field_name) form_element_value = value;
                     });
                     thisInstance.fieldValuesCache[field_name] = form_element_value;
-                }else{
+                } else {
                     form_element_value = thisInstance.fieldValuesCache[field_name];
                 }
             }
             //for Multiple Value control
-            if(form_element.attr('type') == 'hidden'){
+            if (form_element.attr('type') == 'hidden') {
                 form_element = form_element.next();
-                if(!form_element.is('input')){
+                if (!form_element.is('input')) {
                     form_element = form_element.next('select');
-                    if(form_element.val()) form_element_value = form_element.val().join(',');
+                    if (form_element.val()) form_element_value = form_element.val().join(',');
                 }
-                else{
-                    if(form_element.attr('type') == 'checkbox'){
-                        if (form_element.is(":checked"))
-                        {
+                else {
+                    if (form_element.attr('type') == 'checkbox') {
+                        if (form_element.is(":checked")) {
                             form_element_value = 1;
                         }
-                        else{
+                        else {
                             form_element_value = 0;
                         }
 
                     }
                 }
             }
-            if(record_info != undefined && record_info[field_name] != undefined && record_info[field_name] != '' ){
+            if (record_info != undefined && record_info[field_name] != undefined && record_info[field_name] != '') {
                 form_element_value = record_info[field_name];
             }
-            if(typeof form_element_value == "undefined") return false;
-            var result = thisInstance.checkCondition(form_element_value,comparator,field_value,field_name_changed,field_name);
-            if(result){
+            if (typeof form_element_value == "undefined") return false;
+            var result = thisInstance.checkCondition(form_element_value, comparator, field_value, field_name_changed, field_name);
+            if (result) {
                 is_any = true;
             }
         });
         return is_all && is_any;
 
     },
-    displayByClfOnButtonPopup:function(e){
+    displayByClfOnButtonPopup: function (e) {
         var thisInstance = this;
-        if(e != undefined){
+        if (e != undefined) {
             var field_name = jQuery(e).attr('name');
             var field_name_changed = field_name;
-            var new_value=jQuery(e).val();
-        }else{
+            var new_value = jQuery(e).val();
+        } else {
             field_name_changed = 'clf_details';
             new_value = '';
         }
         var module = app.getModuleName();
         var vtebuttons_id = $('input[name="vtebuttons_id"]').val();
         var params = {
-            module : 'ControlLayoutFields',
-            action : 'ActionAjax',
-            mode : 'checkCLFForModule',
-            extension : 'VTEButton',
-            vtebuttons_id : vtebuttons_id,
-            current_module : module
+            module: 'ControlLayoutFields',
+            action: 'ActionAjax',
+            mode: 'checkCLFForModule',
+            extension: 'VTEButton',
+            vtebuttons_id: vtebuttons_id,
+            current_module: module
         };
-        app.request.post({'data': params}).then(
-            function(err,data){
-                if(err === null) {
+        app.request.post({ 'data': params }).then(
+            function (err, data) {
+                if (err === null) {
                     var arrFieldsName = [];
-                    if(!jQuery.isEmptyObject(data)){
+                    if (!jQuery.isEmptyObject(data)) {
                         var role_id = data.role_id;
                         var record_info = data.record_info;
-                        jQuery.each(data.clf_info,function(k,v){
+                        jQuery.each(data.clf_info, function (k, v) {
                             var all_condition = v.condition.all;
                             var any_condition = v.condition.any;
                             var actions = v.actions;
                             var condition_key = k;
-                            var check_condition = thisInstance.checkConditionToButtonPopupForm(all_condition,any_condition,field_name_changed,record_info,role_id,new_value);
-                            if(check_condition){
-                                jQuery.each(actions,function(key,value){
+                            var check_condition = thisInstance.checkConditionToButtonPopupForm(all_condition, any_condition, field_name_changed, record_info, role_id, new_value);
+                            if (check_condition) {
+                                jQuery.each(actions, function (key, value) {
                                     var field_name_action = value.field;
-                                    var form_element = jQuery('#vteButtonQuickEdit').find('[name="'+field_name_action+'"]');
+                                    var form_element = jQuery('#vteButtonQuickEdit').find('[name="' + field_name_action + '"]');
                                     //for Multiple Value control
-                                    if(form_element.attr('type') == 'hidden'){
-                                        form_element = jQuery('#vteButtonQuickEdit').find('[name="'+field_name_action+'[]"]');
-                                        if(form_element.length === 0){
+                                    if (form_element.attr('type') == 'hidden') {
+                                        form_element = jQuery('#vteButtonQuickEdit').find('[name="' + field_name_action + '[]"]');
+                                        if (form_element.length === 0) {
                                             //for reference control uitype 10
-                                            form_element = jQuery('#vteButtonQuickEdit').find('[name="'+field_name_action+'_display"]');
+                                            form_element = jQuery('#vteButtonQuickEdit').find('[name="' + field_name_action + '_display"]');
 
-                                            if(form_element.length === 0){
+                                            if (form_element.length === 0) {
                                                 //for Checkbox control
-                                                form_element = jQuery('#vteButtonQuickEdit').find('[name="'+field_name_action+'"]').last();
+                                                form_element = jQuery('#vteButtonQuickEdit').find('[name="' + field_name_action + '"]').last();
                                             }
                                         }
                                     }
                                     var data_info = form_element.data('fieldname');
                                     var this_td = form_element.closest('td');
-                                    if(value.option == 'mandatory'){
+                                    if (value.option == 'mandatory') {
                                         this_td.show();
                                         this_td.prev().show();
-                                        form_element.attr('data-rule-required','true');
-                                        form_element.addClass(condition_key+'-clf-mandatory');
+                                        form_element.attr('data-rule-required', 'true');
+                                        form_element.addClass(condition_key + '-clf-mandatory');
                                         var field_label = form_element.closest('td').prev();
-                                        if(!field_label.find('span').length) field_label.append('<span class="redColor">*</span>');
-                                    }else if(value.option == 'read_only'){
+                                        if (!field_label.find('span').length) field_label.append('<span class="redColor">*</span>');
+                                    } else if (value.option == 'read_only') {
                                         this_td.show();
                                         this_td.prev().show();
-                                        form_element.attr('readonly','readonly');
+                                        form_element.attr('readonly', 'readonly');
                                         //form_element.attr('disabled','disabled');
-                                        form_element.css('background','rgb(235, 235, 228)');
-                                        form_element.addClass(condition_key+'-clf-read-only');
-                                        if (typeof data_info != 'undefined'){
-                                            if(data_info.type == 'reference'){
+                                        form_element.css('background', 'rgb(235, 235, 228)');
+                                        form_element.addClass(condition_key + '-clf-read-only');
+                                        if (typeof data_info != 'undefined') {
+                                            if (data_info.type == 'reference') {
                                                 var parent_span = form_element.closest('span');
                                                 parent_span.find('div:first').hide();
-                                            }else if(data_info.type == 'multipicklist'){
+                                            } else if (data_info.type == 'multipicklist') {
                                                 form_element.select2('disable');
                                             }
                                         }
-                                    }else if(value.option == 'hide'){
-                                        form_element.addClass(condition_key+'-clf-hide');
+                                    } else if (value.option == 'hide') {
+                                        form_element.addClass(condition_key + '-clf-hide');
                                         this_td.hide();
                                         this_td.prev().hide();
                                         var this_tr = this_td.closest('tr');
                                         thisInstance.hideTr(this_tr);
                                     }
-                                    if(form_element.is('select')) form_element.trigger('liszt:updated');
+                                    if (form_element.is('select')) form_element.trigger('liszt:updated');
                                     //END
                                 });
                             }
-                            else{
-                                jQuery.each(actions,function(key,value){
+                            else {
+                                jQuery.each(actions, function (key, value) {
                                     var field_name_action = value.field;
-                                    var form_element = jQuery('#vteButtonQuickEdit').find('[name="'+field_name_action+'"]');
+                                    var form_element = jQuery('#vteButtonQuickEdit').find('[name="' + field_name_action + '"]');
                                     //for Multiple Value control
-                                    if(form_element.attr('type') == 'hidden'){
-                                        form_element = jQuery('#vteButtonQuickEdit').find('[name="'+field_name_action+'[]"]');
-                                        if(form_element.length === 0){
+                                    if (form_element.attr('type') == 'hidden') {
+                                        form_element = jQuery('#vteButtonQuickEdit').find('[name="' + field_name_action + '[]"]');
+                                        if (form_element.length === 0) {
                                             //for reference control uitype 10
-                                            form_element = jQuery('#vteButtonQuickEdit').find('[name="'+field_name_action+'_display"]');
-                                            if(form_element.length === 0){
+                                            form_element = jQuery('#vteButtonQuickEdit').find('[name="' + field_name_action + '_display"]');
+                                            if (form_element.length === 0) {
                                                 //for Checkbox control
-                                                form_element = jQuery('#vteButtonQuickEdit').find('[name="'+field_name_action+'"]').last();
+                                                form_element = jQuery('#vteButtonQuickEdit').find('[name="' + field_name_action + '"]').last();
                                             }
                                         }
                                     }
                                     var data_info = form_element.data('fieldinfo');
-                                    if(form_element.hasClass(condition_key+'-clf-mandatory')){
+                                    if (form_element.hasClass(condition_key + '-clf-mandatory')) {
                                         form_element.removeAttr('data-rule-required');
                                         form_element.removeAttr('aria-required');
                                         form_element.removeAttr('aria-invalid');
                                         form_element.removeAttr('data-rule-illegal');
-                                        form_element.removeClass(condition_key+'-clf-mandatory');
+                                        form_element.removeClass(condition_key + '-clf-mandatory');
                                     }
-                                    if(form_element.hasClass(condition_key+'-clf-read-only')){
+                                    if (form_element.hasClass(condition_key + '-clf-read-only')) {
                                         form_element.removeAttr('readonly');
                                         form_element.removeAttr('disabled');
-                                        form_element.css('background','white');
-                                        form_element.removeClass(condition_key+'-clf-read-only');
-                                        if (typeof data_info != 'undefined'){
-                                            if(data_info.type == 'reference'){
+                                        form_element.css('background', 'white');
+                                        form_element.removeClass(condition_key + '-clf-read-only');
+                                        if (typeof data_info != 'undefined') {
+                                            if (data_info.type == 'reference') {
                                                 var parent_span = form_element.closest('span');
                                                 parent_span.find('div:first').show();
-                                            }else if(data_info.type == 'multipicklist'){
+                                            } else if (data_info.type == 'multipicklist') {
                                                 form_element.select2('enable');
                                             }
                                         }
                                     }
-                                    if(form_element.hasClass(condition_key+'-clf-hide')){
-                                        form_element.removeClass(condition_key+'-clf-hide');
+                                    if (form_element.hasClass(condition_key + '-clf-hide')) {
+                                        form_element.removeClass(condition_key + '-clf-hide');
                                         var this_td = form_element.closest('td');
                                         //this_td.find('div:first').show();
                                         this_td.show();
                                         this_td.children().show();
                                         this_td.prev().show();
                                         this_td.prev().children().show();
-                                        if(form_element.hasClass('chzn-select') || form_element.hasClass('select2')) form_element.hide();
+                                        if (form_element.hasClass('chzn-select') || form_element.hasClass('select2')) form_element.hide();
                                         // Handler for custom upload field
-                                        if(this_td.find('#frm_'+field_name_action).length > 0) {
+                                        if (this_td.find('#frm_' + field_name_action).length > 0) {
                                             form_element.hide();
                                         }
                                         var this_tr = this_td.closest('tr');
                                         thisInstance.hideTr(this_tr);
                                     }
-                                    if(form_element.is('select')) form_element.trigger('liszt:updated');
+                                    if (form_element.is('select')) form_element.trigger('liszt:updated');
                                 });
                                 //END
                             }
@@ -1574,18 +1819,18 @@ Vtiger.Class("Control_Layout_Fields_Js",{
             }
         );
     },
-    registerVTEButtonPopupEvents:function(){
+    registerVTEButtonPopupEvents: function () {
         var thisInstance = this;
         thisInstance.displayByClfOnButtonPopup();
         var vteButtonQuickEditForm = $('#vteButtonQuickEdit');
-        vteButtonQuickEditForm.on("change","input,select,textarea", function () {
+        vteButtonQuickEditForm.on("change", "input,select,textarea", function () {
             thisInstance.displayByClfOnButtonPopup(this);
         });
     }
     //1205661 END
 });
 var fieldChangedName = '';
-jQuery(document).ready(function(){
+jQuery(document).ready(function () {
     // Only load when loadHeaderScript=1 BEGIN #241208
     var vtetabdonotworking = false;
     var vterbldonotworking = false;
@@ -1609,34 +1854,34 @@ jQuery(document).ready(function(){
     clfInstance.registerEvents();
     var view = app.view();
     var module = app.getModuleName();
-	var ignore_module = ["Workflows"];
-    if($.inArray(module,ignore_module) !== -1) return;
+    var ignore_module = ["Workflows"];
+    if ($.inArray(module, ignore_module) !== -1) return;
     var vtetabs = jQuery("script[src*='VTETabs.js']");
     var relatedBlocksLists = jQuery("script[src*='RelatedBlocksLists.js']");
-    if(view == 'Edit'){
-        clfInstance.displayByClf(module,false,'');
-        clfInstance.registerFormChange(module);
-        $('input.sourceField').each(function(){
+    if (view == 'Edit') {
+        clfInstance.displayByClf("Edit", module, false, '');
+        clfInstance.registerFormChange("Edit", module);
+        $('input.sourceField').each(function () {
             var field_name_changed = jQuery(this).attr('name');
-            jQuery(this).on(Vtiger_Edit_Js.referenceSelectionEvent, function(e, data){
+            jQuery(this).on(Vtiger_Edit_Js.referenceSelectionEvent, function (e, data) {
                 var new_value = data['selectedName'];
-                clfInstance.displayByClf(module,field_name_changed,new_value);
+                clfInstance.displayByClf("Edit", module, field_name_changed, new_value);
             });
         });
     }
-    if(view == 'Detail' && ((vtetabs.length == 0) || ( vtetabs.length == 1 && vtetabdonotworking ))){
+    if (view == 'Detail' && ((vtetabs.length == 0) || (vtetabs.length == 1 && vtetabdonotworking))) {
         var url = window.location.href.split('?');
         var array_url = clfInstance.getQueryParams(url[1]);
-        if(typeof array_url == 'undefined') return false;
+        if (typeof array_url == 'undefined') return false;
         var request_mode = array_url.requestMode;
         var record_id = jQuery('#recordId').val();
-        clfInstance.displayByClfOnDetail(module,request_mode);
-        clfInstance.displayByClfOnDetailFieldPopOut(module,request_mode, false);
+        clfInstance.displayByClfOnDetail(module, request_mode);
+        clfInstance.displayByClfOnDetailFieldPopOut(module, false);
         clfInstance.registerInlineAjaxSaveClickEvent();
     }
 });
 // Listen post ajax event for add product action
-jQuery( document ).ajaxComplete(function(event, xhr, settings) {
+jQuery(document).ajaxComplete(function (event, xhr, settings) {
     // Only load when loadHeaderScript=1 BEGIN #241208
     if (typeof VTECheckLoadHeaderScript == 'function') {
         if (!VTECheckLoadHeaderScript('ControlLayoutFields') && !VTECheckLoadHeaderScript('RelatedBlocksLists')) {
@@ -1649,113 +1894,118 @@ jQuery( document ).ajaxComplete(function(event, xhr, settings) {
         fieldChangedName = jQuery(this).attr('name');
     });
     var url = settings.data;
-    if(typeof url == 'undefined' && settings.url) url = settings.url;
+    if (typeof url == 'undefined' && settings.url) url = settings.url;
     var instance = new Control_Layout_Fields_Js();
     var top_url = window.location.href.split('?');
     var array_url = instance.getQueryParams(top_url[1]);
-    if(typeof array_url == 'undefined') return false;
+    if (typeof array_url == 'undefined') array_url = [];
     var other_url = instance.getQueryParams(url);
     var request_mode = array_url.requestMode;
-    if(array_url.view == 'Detail' && other_url.action == 'SaveAjax'){
+    if (array_url.view == 'Detail' && other_url.action == 'SaveAjax') {
         var modified_field = other_url.field;
         var is_on_condition = false;
         var moduleName = other_url.module;
         var hd_clf_info = jQuery('#hd_clf_info_' + moduleName).val();
-        if(hd_clf_info){
+        if (hd_clf_info) {
             var list_condition = jQuery.parseJSON(hd_clf_info);
-            jQuery.each(list_condition,function(key,value){
+            jQuery.each(list_condition, function (key, value) {
                 var condition_all = value.condition.all;
                 var condition_any = value.condition.any;
-                jQuery.each(condition_all,function(index,val){
-                    if(val.columnname == modified_field){
+                jQuery.each(condition_all, function (index, val) {
+                    if (val.columnname == modified_field) {
                         is_on_condition = true;
                         return false;
                     }
                 });
-                jQuery.each(condition_any,function(index,val){
-                    if(val.columnname == modified_field){
+                jQuery.each(condition_any, function (index, val) {
+                    if (val.columnname == modified_field) {
                         is_on_condition = true;
                         return false;
                     }
                 });
             });
         }
-        if(is_on_condition){
+        if (is_on_condition) {
             var link_active = jQuery('ul.nav').find('li.active');
             var record_id = other_url.record;
             //START
             //TASKID: 1030263 - DEV: tuan@vtexperts.com - DATE: 10/01/2018
             //NOTES: For working with RBL
-            var relatedblockslists_records = $(document).find('[data-id="'+record_id+'"]');
+            var relatedblockslists_records = $(document).find('[data-id="' + record_id + '"]');
             var new_value = other_url.value;
-            if(relatedblockslists_records.length > 0){
+            if (relatedblockslists_records.length > 0) {
                 var block_id = relatedblockslists_records.closest('.relatedblockslists_records').data('block-id');
                 var module_reference = other_url.module;
-                instance.displayByClfOnDetail(module_reference,request_mode, fieldChangedName,record_id,block_id,new_value);
-                instance.displayByClfOnDetailFieldPopOut(module_reference,request_mode, true, fieldChangedName,record_id,block_id,new_value);
+                instance.displayByClfOnDetail(module_reference, request_mode, fieldChangedName, record_id, block_id, new_value);
+                instance.displayByClfOnDetailFieldPopOut(module_reference, true, fieldChangedName, record_id, block_id, new_value);
                 fieldChangedName = '';
-            }else{
+            } else {
                 $('.tab-item.active').trigger('click');
             }
             //END
         }
-    }
-    else if(array_url.view == 'Detail' && other_url.mode == 'showDetailViewByMode'){
+    } else if (array_url.view == 'Detail' && other_url.mode == 'showDetailViewByMode') {
         jQuery("#detailView,.relatedblockslists_records").on("change", "input,select,textarea", function () {
             fieldChangedName = jQuery(this).attr('name');
         });
         var record_id = jQuery('#recordId').val();
-        instance.displayByClfOnDetail(array_url.module,request_mode, fieldChangedName,record_id);
-        instance.displayByClfOnDetailFieldPopOut(array_url.module,request_mode, true, fieldChangedName,record_id);
+        var for_module = array_url.module;
+        if (array_url.relatedModule && array_url.mode == "showRelatedList" && other_url.displayMode == "overlay") {
+            for_module = array_url.relatedModule;
+        }
+        instance.displayByClfOnDetail(for_module, request_mode, fieldChangedName, record_id);
+        instance.displayByClfOnDetailFieldPopOut(for_module, true, fieldChangedName, record_id);
         fieldChangedName = '';
         instance.registerInlineAjaxSaveClickEvent();
-    }
-    else{
+    } else if(array_url.view == 'Detail'&& other_url.view == "Edit" && other_url.displayMode=="overlay"){
+        var for_module = other_url.returnrelatedModuleName;
+        instance.displayByClf("Edit", for_module,false);
+        instance.registerFormChange("Edit", for_module);
+    } else if(other_url.view == "QuickCreateAjax"){
+        var for_module = other_url.module;
+        instance.displayByClf("QuickCreateAjax", for_module,false);
+        instance.registerFormChange("QuickCreateAjax", for_module);
+    } else {
         //Working with VTETabs
-        if(other_url.module == 'VTETabs' && other_url.view == 'Edit' && other_url.mode == 'showModuleEditView') {
-            instance.displayByClf(array_url.module,false);
-            instance.registerFormChange(array_url.module);
+        if (other_url.module == 'VTETabs' && other_url.view == 'Edit' && other_url.mode == 'showModuleEditView') {
+            instance.displayByClf("Edit", array_url.module, false);
+            instance.registerFormChange("Edit", array_url.module);
         }
-        if(other_url.module == 'VTETabs' && other_url.view == 'DetailViewAjax' && other_url.mode == 'showModuleDetailView') {
+        if (other_url.module == 'VTETabs' && other_url.view == 'DetailViewAjax' && other_url.mode == 'showModuleDetailView') {
             var record_id = jQuery('#recordId').val();
-            instance.displayByClfOnDetail(array_url.module,request_mode, fieldChangedName,record_id);
-            instance.displayByClfOnDetailFieldPopOut(array_url.module,request_mode, true, fieldChangedName,record_id);
+            instance.displayByClfOnDetail(array_url.module, request_mode, fieldChangedName, record_id);
+            instance.displayByClfOnDetailFieldPopOut(array_url.module, true, fieldChangedName, record_id);
             fieldChangedName = '';
             instance.registerInlineAjaxSaveClickEvent();
         }
-        //START
-        //TASKID: 1030263 - DEV: tuan@vtexperts.com - DATE: 27/09/2018
         //NOTES: For working with RBL
-        if(other_url.module == 'RelatedBlocksLists' && other_url.view == 'MassActionAjax' && other_url.mode == 'generateEditView') {
+        if (other_url.module == 'RelatedBlocksLists' && other_url.view == 'MassActionAjax' && other_url.mode == 'generateEditView') {
             var blockid = other_url.blockid;
             var relatedblockslists_records = $(document).find('div.relatedblockslists' + blockid);
-            if(relatedblockslists_records.length > 0){
+            if (relatedblockslists_records.length > 0) {
                 var module = relatedblockslists_records.data('rel-module');
-                instance.displayByClf(module,false,'',blockid);
-                instance.registerFormChange(module);
+                instance.displayByClf("Edit", module, false, '', blockid);
+                instance.registerFormChange("Edit", module);
             }
         }
-        if(other_url.module == 'RelatedBlocksLists' && other_url.view == 'MassActionAjax' &&  other_url.mode == 'generateDetailView') {
+        if (other_url.module == 'RelatedBlocksLists' && other_url.view == 'MassActionAjax' && other_url.mode == 'generateDetailView') {
             var record_id = other_url.record;
             var blockid = other_url.blockid;
             var relatedblockslists_records = $(document).find('div.relatedblockslists' + blockid);
-            if(relatedblockslists_records.length > 0){
+            if (relatedblockslists_records.length > 0) {
                 var module = relatedblockslists_records.data('rel-module');
-                instance.displayByClfOnDetail(module,request_mode, fieldChangedName,record_id,blockid,"");
-                instance.displayByClfOnDetailFieldPopOut(module,request_mode, true, fieldChangedName,record_id,blockid,"");
+                instance.displayByClfOnDetail(module, request_mode, fieldChangedName, record_id, blockid, "");
+                instance.displayByClfOnDetailFieldPopOut(module, true, fieldChangedName, record_id, blockid, "");
                 fieldChangedName = '';
                 instance.registerInlineAjaxSaveClickEvent();
-                instance.registerFormChange(module);
+                instance.registerFormChange("Edit", module);
             }
         }
         //END
     }
-    //1205661 BEGIN
     // make ConditionLayout work witd VTEButton popup
-    //pham@vtexperts.com
-    if(Object.prototype.toString.call(url) =='[object String]' && url.indexOf('module=VTEButtons') != -1 && url.indexOf('view=QuickEditAjax') != -1){
+    if (Object.prototype.toString.call(url) == '[object String]' && url.indexOf('module=VTEButtons') != -1 && url.indexOf('view=QuickEditAjax') != -1) {
         var clfInstance = new Control_Layout_Fields_Js();
-        clfInstance.registerVTEButtonPopupEvents(); 
+        clfInstance.registerVTEButtonPopupEvents();
     }
-    //1205661 END
 });
